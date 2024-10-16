@@ -1,12 +1,14 @@
 {
   "name": "decryption",
   "version": "0.0.0",
+  "homepage": "https://NestorM14.github.io/decryption",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "deploy": "npm run build && gh-pages -d dist/decryption/browser"
   },
   "private": true,
   "dependencies": {
