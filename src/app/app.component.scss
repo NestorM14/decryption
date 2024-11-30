@@ -216,6 +216,62 @@ main {
   gap: 20px;
 }
 
+.button-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.styled-button {
+  padding: 12px 24px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s, box-shadow 0.3s;
+  flex: 3; /* Hace que el botón de Desencriptar sea más ancho */
+
+  &:hover {
+    background-color: #0056b3;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  &.clear-button {
+    background-color: #4a5568; /* Un gris más oscuro y profesional */
+    padding: 10px 20px;
+    font-size: 0.9em;
+    flex: 1; /* Hace que el botón de limpiar sea más pequeño en comparación */
+
+    &:hover {
+      background-color: #2d3748; /* Un gris más oscuro para el hover */
+    }
+  }
+}
+
+.styled-textarea {
+  width: 600px;
+  min-height: 190px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s;
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  resize: vertical;
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+}
+
+
 @media screen and (max-width: 650px) {
   .content {
     flex-direction: column;

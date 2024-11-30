@@ -17,6 +17,11 @@ export class AppComponent {
   encryptedCode = new FormControl("");
   private encryptionService = inject(EncryptionService);
 
+  limpiar() {
+    this.encryptedCode.reset();
+    this.dataDesencriptada = '';
+  }
+
   desencriptar() {
     const code = this.encryptedCode.value;
     if (code) {
@@ -40,27 +45,18 @@ export class AppComponent {
   }
 
   private extractEncryptedCode(input: string): string | null {
-    // Expresión regular para encontrar una cadena base64 válida
     const base64Regex = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
-
-    // Eliminar cualquier espacio en blanco, saltos de línea y caracteres no deseados
     const cleanedInput = input.replace(/\s/g, '');
-
-    // Buscar la cadena más larga que coincida con el patrón base64
     const matches = cleanedInput.match(/[A-Za-z0-9+/=]+/g);
 
     if (matches) {
-      // Ordenar las coincidencias por longitud, de más larga a más corta
       const sortedMatches = matches.sort((a, b) => b.length - a.length);
-
-      // Encontrar la primera coincidencia que sea una cadena base64 válida
       for (const match of sortedMatches) {
         if (base64Regex.test(match)) {
           return match;
         }
       }
     }
-
     return null;
   }
 }

@@ -68,13 +68,19 @@
             ></textarea>
           </div>
         </div>
-        <button class="styled-button" type="button" (click)="desencriptar()">
-          Decryption
-        </button>
+        <div class="button-group">
+          <button class="styled-button clear-button" type="button" (click)="limpiar()">
+            Clear
+          </button>
+          <button class="styled-button" type="button" (click)="desencriptar()">
+            Decryption
+          </button>
+        </div>
         <pre>{{ dataDesencriptada | json }}</pre>
       </div>
     </div>
   </div>
 </main>
+
 
 <router-outlet />
