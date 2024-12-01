@@ -1,1 +1,23 @@
-/* You can add global styles to this file, and also import other style files */
+/* styles.scss */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: 'untitled-font', sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #fff;
+
+  &.dark {
+    background: #111111; // Radix UI dark background
+  }
+}
+

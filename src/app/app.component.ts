@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { Component, inject } from '@angular/core';
 import { EncryptionService } from './shared/services/encryption.service';
+import * as packageJson from './../../package.json';
 
 @Component({
   selector: 'app-root',
@@ -14,12 +15,32 @@ import { EncryptionService } from './shared/services/encryption.service';
 export class AppComponent {
   title = 'Decrypted';
   dataDesencriptada: any;
-  encryptedCode = new FormControl("");
+  version = packageJson.version;
+  encryptedCode = new FormControl('');
+  copiado: boolean = false;
+  private timeoutId: any;
   private encryptionService = inject(EncryptionService);
 
   limpiar() {
     this.encryptedCode.reset();
     this.dataDesencriptada = '';
+  }
+
+  copiarResultado() {
+    const texto = JSON.stringify(this.dataDesencriptada, null, 2);
+    navigator.clipboard.writeText(texto).then(() => {
+      this.copiado = true;
+
+      // Limpiar cualquier timeout existente
+      if (this.timeoutId) {
+        clearTimeout(this.timeoutId);
+      }
+
+      // Restaurar el icono después de 2 segundos
+      this.timeoutId = setTimeout(() => {
+        this.copiado = false;
+      }, 2000);
+    });
   }
 
   desencriptar() {
