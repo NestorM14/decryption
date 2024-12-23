@@ -1,18 +1,41 @@
 import { Injectable } from '@angular/core';
-import { from, Observable, throwError } from 'rxjs';
+import { from, Observable, throwError, firstValueFrom } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EncryptionService {
-
-  private clavePredefinida: CryptoKey | undefined;
+  private claves: CryptoKey[] = [];
   private count = 1;
 
-  constructor() {
-    this.importarClavePredefinida();
+  // Definimos las claves hexadecimales que vamos a usar
+  private readonly CLAVES_HEX = [
+    '2b7e151628aed2a6abf7158809cf4f2c',  // Clave principal - DEV / QA
+    '1b7e201648acd2a6abf7158107df1f2b'   // Clave secundaria - PRODUCTION
+  ];
 
+  constructor() {
+    this.importarClaves();
+  }
+
+  private async importarClaves(): Promise<void> {
+    try {
+      for (const claveHex of this.CLAVES_HEX) {
+        const claveArrayBuffer = this.hexStringToArrayBuffer(claveHex);
+        const clave = await window.crypto.subtle.importKey(
+          'raw',
+          claveArrayBuffer,
+          { name: 'AES-GCM' },
+          true,
+          ['encrypt', 'decrypt']
+        );
+        this.claves.push(clave);
+        console.log('Clave importada con éxito:', claveHex);
+      }
+    } catch (error) {
+      console.error('Error al importar las claves:', error);
+    }
   }
 
   isBase64(str: string): boolean {
@@ -23,59 +46,31 @@ export class EncryptionService {
     }
   }
 
-  getMessageEncoding() {
-    let message = 'text';
-    let enc = new TextEncoder();
-    console.log(enc.encode(message));
-    return enc.encode(message);
-  }
-
-  importarClavePredefinida(): Observable<void> {
-    const clavePredefinidaHex = '2b7e151628aed2a6abf7158809cf4f2c';
-    const claveArrayBuffer = this.hexStringToArrayBuffer(clavePredefinidaHex);
-
-    return from(
-      window.crypto.subtle.importKey(
-        'raw',
-        claveArrayBuffer,
-        { name: 'AES-GCM' },
-        true,
-        ['encrypt', 'decrypt']
-      ).then(clave => {
-        this.clavePredefinida = clave;
-        console.log('Clave predefinida importada con éxito:', this.clavePredefinida);
-      }).catch(error => {
-        console.error('Error al importar la clave predefinida:', error);
-      })
-    ).pipe(
-      map(() => undefined)
-    );
-  }
-
   hexStringToArrayBuffer(hexString: string): ArrayBuffer {
     const bytes = new Uint8Array(hexString.match(/[\da-f]{2}/gi)!.map(h => parseInt(h, 16)));
     return bytes.buffer;
   }
 
   encryptMessage(obj: any): Observable<string> {
-    console.log('👋 Obj',JSON.stringify(obj));
+    console.log('👋 Obj', JSON.stringify(obj));
 
-    if (!this.clavePredefinida) {
-      throw new Error('Clave de encriptación no está disponible');
+    if (this.claves.length === 0) {
+      return throwError(() => new Error('No hay claves de encriptación disponibles'));
     }
 
+    // Usamos la primera clave (principal) para encriptar
     return from((async () => {
       let encoded = new TextEncoder().encode(JSON.stringify(obj));
-
       let iv = window.crypto.getRandomValues(new Uint8Array(16));
       let aad = window.crypto.getRandomValues(new Uint8Array(16));
+
       let ciphertext = await window.crypto.subtle.encrypt(
         {
           name: "AES-GCM",
           iv: iv,
           additionalData: aad,
         },
-        this.clavePredefinida!,
+        this.claves[0],
         encoded
       );
 
@@ -88,22 +83,15 @@ export class EncryptionService {
       result.set(tag, aad.length + iv.length);
       result.set(cipher, aad.length + iv.length + tag.length);
 
-      console.log('✅ ', this.count,'Encrypted Message', btoa(String.fromCharCode(...result)));
+      console.log('✅ ', this.count, 'Encrypted Message', btoa(String.fromCharCode(...result)));
       this.count++;
 
       return btoa(String.fromCharCode(...result));
     })());
   }
 
-
-
-  decryptMessage(encrypted: string): Observable<any> {
-    console.log('Decrypted Messages', encrypted, this.clavePredefinida)
-    if (!this.clavePredefinida) {
-      throw new Error('Clave de desencriptación no está disponible');
-    }
-
-    return from((async () => {
+  private async tryDecrypt(encrypted: string, clave: CryptoKey): Promise<any> {
+    try {
       const encryptedArray = Uint8Array.from(atob(encrypted), c => c.charCodeAt(0));
       const iv = encryptedArray.slice(0, 16);
       const aad = encryptedArray.slice(16, 32);
@@ -120,20 +108,36 @@ export class EncryptionService {
           iv: iv,
           additionalData: aad,
         },
-        this.clavePredefinida!,
+        clave,
         combinedCipherText
       );
 
       const decryptedString = new TextDecoder().decode(decryptedArrayBuffer);
-      // Intentar parsear como JSON
-      try {
-        console.log('🐳',JSON.parse(decryptedString));
+      return JSON.parse(decryptedString);
+    } catch (e) {
+      return null;
+    }
+  }
 
-        return JSON.parse(decryptedString);
-      } catch (e) {
-        // Si no es JSON, retornarlo como una cadena (HTML)
-        return decryptedString;
+  decryptMessage(encrypted: string): Observable<any> {
+    console.log('Attempting to decrypt message:', encrypted);
+
+    if (this.claves.length === 0) {
+      return throwError(() => new Error('No hay claves de desencriptación disponibles'));
+    }
+
+    return from((async () => {
+      // Intentamos desencriptar con cada clave
+      for (let i = 0; i < this.claves.length; i++) {
+        const result = await this.tryDecrypt(encrypted, this.claves[i]);
+        if (result !== null) {
+          console.log(`🔓 Mensaje desencriptado exitosamente con la clave ${i + 1}`);
+          return result;
+        }
       }
+
+      // Si ninguna clave funcionó, lanzamos un error
+      throw new Error('No se pudo desencriptar el mensaje con ninguna de las claves disponibles');
     })());
   }
 }
