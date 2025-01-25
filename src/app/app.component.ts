@@ -1,6 +1,5 @@
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl } from '@angular/forms';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
 import { Component, inject } from '@angular/core';
 import { EncryptionService } from './shared/services/encryption.service';
 import * as packageJson from './../../package.json';
@@ -8,7 +7,7 @@ import * as packageJson from './../../package.json';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { from, Observable, throwError, firstValueFrom } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { from, Observable, throwError } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +11,8 @@ export class EncryptionService {
 
   // Definimos las claves hexadecimales que vamos a usar
   private readonly CLAVES_HEX = [
-    '2b7e151628aed2a6abf7158809cf4f2c',  // Clave principal - DEV / QA
-    '1b7e201648acd2a6abf7158107df1f2b'   // Clave secundaria - PRODUCTION
+    environment.keyEncryptDev, // Clave principal - DEV / QA
+    environment.keyEncryptProd // Clave secundaria - PRODUCTION
   ];
 
   constructor() {
