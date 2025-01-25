@@ -54,7 +54,7 @@
             },
             "development": {
               "outputHashing": "all",
-              "optimization": true,
+              "optimization": false,
               "extractLicenses": false,
               "sourceMap": true,
               "fileReplacements": [

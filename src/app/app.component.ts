@@ -5,11 +5,10 @@ import { EncryptionService } from './shared/services/encryption.service';
 import * as packageJson from './../../package.json';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
+    selector: 'app-root',
+    imports: [CommonModule, ReactiveFormsModule],
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
   title = 'Decrypted';
