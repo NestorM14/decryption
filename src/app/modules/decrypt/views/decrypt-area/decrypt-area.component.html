@@ -6,7 +6,12 @@
   <form [formGroup]="decryptForm">
     <div class="text-areas-container">
       <div class="text-area-wrapper">
-        <label>Encrypted Code</label>
+        <div class="label-container">
+          <label>Encrypted Code</label>
+          <div class="line-container">
+            <div class="line"></div>
+          </div>
+        </div>
         <textarea
           formControlName="encryptedCode"
           placeholder="Paste your encrypted code here"
@@ -22,7 +27,7 @@
             <mat-icon>delete_outline</mat-icon>
             Clear
           </button>
-          <button mat-flat-button class="decrypt-btn" (click)="decrypt()">
+          <button mat-flat-button class="decrypt-btn" (click)="decrypt()" [disabled]="!decryptForm.get('encryptedCode')?.value">
             <mat-icon>lock_open</mat-icon>
             Decrypt
           </button>
@@ -30,7 +35,12 @@
       </div>
 
       <div class="text-area-wrapper">
-        <label>Decrypted Code</label>
+        <div class="label-container">
+          <label>Decrypted Code</label>
+          <div class="line-container">
+            <div class="line"></div>
+          </div>
+        </div>
         <textarea
           formControlName="decryptedCode"
           placeholder="Your decrypted code will appear here"
@@ -41,16 +51,17 @@
           cdkAutosizeMinRows="3"
           cdkAutosizeMaxRows="10"
           readonly>
+          {{decryptForm.get('decryptedCode')?.value | json}}
         </textarea>
         <div class="actions right">
           <button mat-icon-button class="copy-btn" (click)="copyToClipboard()" [disabled]="!decryptForm.get('decryptedCode')?.value">
-            <mat-icon>content_copy</mat-icon>
+            <mat-icon>{{copiado ? 'check' : 'content_copy'}}</mat-icon>
           </button>
         </div>
       </div>
     </div>
   </form>
   <div class="footer">
-    V 1.0.0 | 2025
+    V {{version}} | NST | 2025
   </div>
 </div>

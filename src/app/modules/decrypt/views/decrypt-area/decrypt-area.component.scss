@@ -37,14 +37,37 @@
 
     .text-area-wrapper {
       flex: 1;
-      text-align: left;
+      text-align: center;
 
-      label {
-        display: block;
-        color: var(--text-primary);
-        font-size: 0.875rem;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
+      .label-container {
+        margin-bottom: 1rem;
+
+        label {
+          display: block;
+          color: var(--text-primary);
+          font-size: 1.3rem;
+          font-weight: 500;
+          margin-bottom: 0.75rem;
+        }
+
+        .line-container {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          margin: 0 auto;
+          width: 80%;
+
+          .line {
+            height: 1px;
+            background-image: linear-gradient(
+              to right,
+              transparent,
+              var(--text-tertiary) 30%,
+              var(--text-tertiary) 70%,
+              transparent
+            );
+          }
+        }
       }
 
       textarea {
@@ -58,6 +81,7 @@
         resize: vertical;
         transition: border-color 0.2s ease;
         min-height: 120px;
+        text-align: left;
 
         &.focused {
           border-color: #3CBCDD;
