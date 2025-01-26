@@ -1,23 +1,41 @@
-/* styles.scss */
+// Variables
+$dark-bg-primary: #111111;
+$dark-bg-secondary: oklch(31.7% 0.0653 219 / 1);
+$text-primary: #FFFFFF;
+$text-secondary: #B3B3B3;
+$text-tertiary: #808080;
+
+
+
+:root {
+  --bg-primary: #{$dark-bg-primary};
+  --bg-secondary: #{$dark-bg-secondary};
+  --text-primary: #{$text-primary};
+  --text-secondary: #{$text-secondary};
+  --text-tertiary: #{$text-tertiary};
+  --dark-gradient: linear-gradient(to bottom, var(--bg-secondary), transparent);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html,
-body {
+html, body {
   height: 100%;
-}
-
-body {
-  font-family: 'untitled-font', sans-serif;
+  margin: 0;
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
   font-size: 13px;
   line-height: 1.6;
-  color: #fff;
-
-  &.dark {
-    background: #111111; // Radix UI dark background
-  }
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
+.mat-toolbar {
+  background-color: transparent !important;
+}
+
+.gradient-overlay {
+  z-index: 1;
+}

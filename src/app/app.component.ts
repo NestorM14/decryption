@@ -3,10 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { EncryptionService } from './shared/services/encryption.service';
 import * as packageJson from './../../package.json';
+import { DecryptAreaComponent } from "./modules/decrypt/views/decrypt-area/decrypt-area.component";
+import { HeaderComponent } from "./modules/decrypt/views/header/header.component";
 
 @Component({
     selector: 'app-root',
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, HeaderComponent, DecryptAreaComponent],
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss']
 })

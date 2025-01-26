@@ -1,0 +1,56 @@
+<!-- decrypt-area.component.html -->
+<div class="decrypt-container">
+  <p class="subtitle">Radix</p>
+  <h1 class="title">Secure Decryption</h1>
+
+  <form [formGroup]="decryptForm">
+    <div class="text-areas-container">
+      <div class="text-area-wrapper">
+        <label>Encrypted Code</label>
+        <textarea
+          formControlName="encryptedCode"
+          placeholder="Paste your encrypted code here"
+          [ngClass]="{'focused': encryptedFocused}"
+          (focus)="encryptedFocused = true"
+          (blur)="encryptedFocused = false"
+          cdkTextareaAutosize
+          cdkAutosizeMinRows="3"
+          cdkAutosizeMaxRows="10">
+        </textarea>
+        <div class="actions">
+          <button mat-button class="clear-btn" (click)="clearForm()">
+            <mat-icon>delete_outline</mat-icon>
+            Clear
+          </button>
+          <button mat-flat-button class="decrypt-btn" (click)="decrypt()">
+            <mat-icon>lock_open</mat-icon>
+            Decrypt
+          </button>
+        </div>
+      </div>
+
+      <div class="text-area-wrapper">
+        <label>Decrypted Code</label>
+        <textarea
+          formControlName="decryptedCode"
+          placeholder="Your decrypted code will appear here"
+          [ngClass]="{'focused': decryptedFocused}"
+          (focus)="decryptedFocused = true"
+          (blur)="decryptedFocused = false"
+          cdkTextareaAutosize
+          cdkAutosizeMinRows="3"
+          cdkAutosizeMaxRows="10"
+          readonly>
+        </textarea>
+        <div class="actions right">
+          <button mat-icon-button class="copy-btn" (click)="copyToClipboard()" [disabled]="!decryptForm.get('decryptedCode')?.value">
+            <mat-icon>content_copy</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+  <div class="footer">
+    V 1.0.0 | 2025
+  </div>
+</div>

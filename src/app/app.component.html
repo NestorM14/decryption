@@ -1,56 +1,7 @@
 <div class="app-container">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="logo-container">
-      <img src="./angular.svg" alt="Logo angular" width="70" height="70" />
-      <h2 class="logo-text">DECRYPT</h2>
-      <p class="version-text">v {{ version }}</p>
-    </div>
-  </aside>
-
-  <!-- Main Content -->
-  <main class="main-content">
-    <!-- <h1 class="main-title">DECRYPT</h1> -->
-
-    <div class="content-grid">
-      <!-- Input Section -->
-      <section class="input-section">
-        <div class="card">
-          <textarea
-            [formControl]="encryptedCode"
-            class="code-input"
-            placeholder="Pega aquí tu código encriptado..."
-          ></textarea>
-          <div class="button-container">
-            <button (click)="limpiar()" class="btn btn-clear">
-              Limpiar
-            </button>
-            <button (click)="desencriptar()" class="btn btn-decrypt">
-
-              Desencriptar
-            </button>
-          </div>
-        </div>
-      </section>
-
-     <!-- Output Section -->
-      <section class="output-section">
-        <div class="card">
-          <div class="output-header">
-            <button (click)="copiarResultado()" class="copy-button" [class.copied]="copiado">
-              <svg *ngIf="!copiado" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-              <svg *ngIf="copiado" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-              {{ copiado ? 'Copiado!' : 'Copiar' }}
-            </button>
-          </div>
-          <pre class="code-output">{{ dataDesencriptada | json }}</pre>
-        </div>
-      </section>
-    </div>
-  </main>
+  <div class="gradient-overlay"></div>
+  <app-header></app-header>
+  <app-decrypt-area></app-decrypt-area>
 </div>
+
+

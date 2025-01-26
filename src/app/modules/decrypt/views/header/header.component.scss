@@ -1,0 +1,56 @@
+.header {
+  position: relative;
+  z-index: 10;
+  height: 48px;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 16px;
+  background-color: transparent;
+
+  .logos-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .logo {
+      height: 32px;
+      width: auto;
+      filter: brightness(0) invert(1);
+    }
+
+    .vertical-divider {
+      width: 1px;
+      height: 24px;
+      background-color: var(--text-tertiary);
+    }
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+
+    mat-icon {
+      color: var(--text-primary);
+      cursor: pointer;
+
+      &:hover {
+        color: var(--text-secondary);
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 0 8px;
+
+    .logos-container {
+      gap: 8px;
+    }
+
+    .actions {
+      gap: 16px;
+    }
+  }
+}
