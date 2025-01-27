@@ -20,7 +20,7 @@
     z-index: 6;
     color: var(--text-primary);
     font-size: 2rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     font-weight: 500;
   }
 
@@ -33,11 +33,11 @@
     z-index: 6;
     display: flex;
     gap: 2rem;
-    margin-top: 2rem;
 
     .text-area-wrapper {
       flex: 1;
       text-align: center;
+      position: relative;
 
       .label-container {
         margin-bottom: 1rem;
@@ -70,6 +70,24 @@
         }
       }
 
+      .copy-btn {
+        position: absolute;
+        top: 5px;
+        right: 0;
+        z-index: 10;
+        color: var(--text-primary);
+
+        &:disabled {
+          color: var(--text-tertiary);
+        }
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+
       textarea {
         width: 100%;
         padding: 1rem;
@@ -98,10 +116,6 @@
         gap: 1rem;
         margin-top: 1rem;
         justify-content: center;
-
-        &.right {
-          justify-content: flex-end;
-        }
 
         .clear-btn {
           color: var(--text-primary);
@@ -147,20 +161,6 @@
             background-color: var(--text-tertiary);
           }
         }
-
-        .copy-btn {
-          color: var(--text-primary);
-
-          &:disabled {
-            color: var(--text-tertiary);
-          }
-
-          mat-icon {
-            font-size: 20px;
-            width: 20px;
-            height: 20px;
-          }
-        }
       }
     }
   }
@@ -184,9 +184,22 @@
       gap: 1.5rem;
 
       .text-area-wrapper {
+        .copy-btn {
+          top: 5px;
+          right: 0;
+        }
+
         .actions {
           flex-direction: column;
           gap: 0.5rem;
+
+          .mobile-first {
+            order: -1;
+          }
+
+          .mobile-second {
+            order: 1;
+          }
 
           &:not(.right) {
             .clear-btn,

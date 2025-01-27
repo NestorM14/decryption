@@ -18,6 +18,7 @@ export class DecryptAreaComponent {
 
   dataDesencriptada: any;
   version = packageJson.version;
+  currentYear = new Date().getFullYear();
   encryptedCode = new FormControl('');
   copiado: boolean = false;
   private _timeoutId: any;

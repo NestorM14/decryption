@@ -5,8 +5,6 @@ $text-primary: #FFFFFF;
 $text-secondary: #B3B3B3;
 $text-tertiary: #808080;
 
-
-
 :root {
   --bg-primary: #{$dark-bg-primary};
   --bg-secondary: #{$dark-bg-secondary};
@@ -25,17 +23,24 @@ $text-tertiary: #808080;
 html, body {
   height: 100%;
   margin: 0;
+  padding: 0;
   font-family: 'Roboto', 'Helvetica Neue', sans-serif;
   font-size: 13px;
   line-height: 1.6;
   background-color: var(--bg-primary);
   color: var(--text-primary);
+  overflow: hidden;
 }
 
 .mat-toolbar {
   background-color: transparent !important;
 }
 
-.gradient-overlay {
-  z-index: 1;
+@media (max-width: 768px) {
+  html, body {
+    height: auto;
+    min-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
 }

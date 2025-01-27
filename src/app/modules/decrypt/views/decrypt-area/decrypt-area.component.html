@@ -1,6 +1,6 @@
 <!-- decrypt-area.component.html -->
 <div class="decrypt-container">
-  <p class="subtitle">Radix</p>
+  <p class="subtitle">VASS</p>
   <h1 class="title">Secure Decryption</h1>
 
   <form [formGroup]="decryptForm">
@@ -23,13 +23,13 @@
           cdkAutosizeMaxRows="10">
         </textarea>
         <div class="actions">
-          <button mat-button class="clear-btn" (click)="clearForm()">
-            <mat-icon>delete_outline</mat-icon>
-            Clear
-          </button>
-          <button mat-flat-button class="decrypt-btn" (click)="decrypt()" [disabled]="!decryptForm.get('encryptedCode')?.value">
+          <button mat-flat-button class="decrypt-btn mobile-first" (click)="decrypt()" [disabled]="!decryptForm.get('encryptedCode')?.value">
             <mat-icon>lock_open</mat-icon>
             Decrypt
+          </button>
+          <button mat-button class="clear-btn mobile-second" (click)="clearForm()">
+            <mat-icon>delete_outline</mat-icon>
+            Clear
           </button>
         </div>
       </div>
@@ -41,6 +41,9 @@
             <div class="line"></div>
           </div>
         </div>
+        <button mat-icon-button class="copy-btn" (click)="copyToClipboard()" [disabled]="!decryptForm.get('decryptedCode')?.value">
+          <mat-icon>{{copiado ? 'check' : 'content_copy'}}</mat-icon>
+        </button>
         <textarea
           formControlName="decryptedCode"
           placeholder="Your decrypted code will appear here"
@@ -53,15 +56,10 @@
           readonly>
           {{decryptForm.get('decryptedCode')?.value | json}}
         </textarea>
-        <div class="actions right">
-          <button mat-icon-button class="copy-btn" (click)="copyToClipboard()" [disabled]="!decryptForm.get('decryptedCode')?.value">
-            <mat-icon>{{copiado ? 'check' : 'content_copy'}}</mat-icon>
-          </button>
-        </div>
       </div>
     </div>
   </form>
   <div class="footer">
-    V {{version}} | NST | 2025
+    V {{version}} | NST | {{currentYear}}
   </div>
 </div>
