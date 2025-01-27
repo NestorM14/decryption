@@ -1,3 +1,5 @@
+@use "sass:color";
+
 .decrypt-container {
   position: relative;
   z-index: 5;
@@ -154,7 +156,7 @@
           }
 
           &:hover {
-            background-color: darken(#3CBCDD, 5%);
+            background-color: color.adjust(#3CBCDD, $lightness: -5%);
           }
 
           &:disabled {
