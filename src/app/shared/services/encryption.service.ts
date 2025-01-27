@@ -31,7 +31,6 @@ export class EncryptionService {
           ['encrypt', 'decrypt']
         );
         this.claves.push(clave);
-        console.log('Clave importada con éxito:', claveHex);
       }
     } catch (error) {
       console.error('Error al importar las claves:', error);

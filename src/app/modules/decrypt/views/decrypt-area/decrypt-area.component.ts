@@ -15,15 +15,17 @@ export class DecryptAreaComponent {
   decryptForm!: FormGroup;
   encryptedFocused = false;
   decryptedFocused = false;
-
   dataDesencriptada: any;
   version = packageJson.version;
-  currentYear = new Date().getFullYear();
-  encryptedCode = new FormControl('');
   copiado: boolean = false;
+
+  encryptedCode = new FormControl('');
+  currentYear = new Date().getFullYear();
+
   private _timeoutId: any;
-  private _encryptionSrv = inject(EncryptionService);
+
   private _fb = inject(FormBuilder);
+  private _encryptionSrv = inject(EncryptionService);
 
   ngOnInit() {
     this.decryptForm = this._fb.group({
