@@ -1,9 +1,13 @@
+// app.component.scss
 .app-container {
   min-height: 100vh;
   width: 100%;
   position: relative;
   background-color: var(--bg-primary);
   color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; // Importante para evitar scroll doble
 }
 
 .gradient-overlay {

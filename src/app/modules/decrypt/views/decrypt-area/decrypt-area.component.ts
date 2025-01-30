@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MaterialModule } from '../../../../shared/material.module';
 import * as packageJson from './../../../../../../package.json';
@@ -11,7 +11,10 @@ import { EncryptionService } from '../../../../shared/services/encryption.servic
   templateUrl: './decrypt-area.component.html',
   styleUrl: './decrypt-area.component.scss'
 })
-export class DecryptAreaComponent {
+export class DecryptAreaComponent implements AfterViewInit {
+  @ViewChild('preContent') preContent!: ElementRef;
+  @ViewChild('decryptedTextarea') decryptedTextarea!: ElementRef;
+
   decryptForm!: FormGroup;
   encryptedFocused = false;
   decryptedFocused = false;
@@ -32,6 +35,37 @@ export class DecryptAreaComponent {
       encryptedCode: [''],
       decryptedCode: ['']
     });
+
+    // Suscribirse a los cambios del campo decryptedCode
+    this.decryptForm.get('decryptedCode')?.valueChanges.subscribe(() => {
+      setTimeout(() => this.adjustTextareaHeight(), 0);
+    });
+  }
+
+  ngAfterViewInit() {
+    // Ajustar altura inicial si hay contenido
+    if (this.decryptForm.get('decryptedCode')?.value) {
+      this.adjustTextareaHeight();
+    }
+  }
+
+  private adjustTextareaHeight() {
+    if (this.preContent && this.decryptedTextarea) {
+      const content = this.preContent.nativeElement;
+      const textarea = this.decryptedTextarea.nativeElement;
+
+      // La altura del contenido más el padding
+      const contentHeight = content.scrollHeight;
+
+      // Calculamos la altura máxima disponible (viewport - espacio para otros elementos)
+      const maxHeight = window.innerHeight - 300; // Ajusta este valor según necesites
+
+      // Usamos la altura del contenido, pero no menos que 360px ni más que maxHeight
+      const finalHeight = Math.min(Math.max(360, contentHeight), maxHeight);
+
+      // Aplicamos la altura calculada
+      textarea.style.height = `${finalHeight}px`;
+    }
   }
 
   clearForm() {

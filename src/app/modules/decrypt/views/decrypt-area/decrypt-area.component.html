@@ -1,10 +1,10 @@
-<!-- decrypt-area.component.html -->
 <div class="decrypt-container">
   <p class="subtitle">VASS</p>
   <h1 class="title">Secure Decryption</h1>
 
   <form [formGroup]="decryptForm">
     <div class="text-areas-container">
+      <!-- Área de código encriptado -->
       <div class="text-area-wrapper">
         <div class="label-container">
           <label>Encrypted Code</label>
@@ -17,10 +17,7 @@
           placeholder="Paste your encrypted code here"
           [ngClass]="{'focused': encryptedFocused}"
           (focus)="encryptedFocused = true"
-          (blur)="encryptedFocused = false"
-          cdkTextareaAutosize
-          cdkAutosizeMinRows="3"
-          cdkAutosizeMaxRows="10">
+          (blur)="encryptedFocused = false">
         </textarea>
         <div class="actions">
           <button mat-flat-button class="decrypt-btn mobile-first" (click)="decrypt()" [disabled]="!decryptForm.get('encryptedCode')?.value">
@@ -34,6 +31,7 @@
         </div>
       </div>
 
+      <!-- Área de código desencriptado -->
       <div class="text-area-wrapper">
         <div class="label-container">
           <label>Decrypted Code</label>
@@ -44,21 +42,22 @@
         <button mat-icon-button class="copy-btn" (click)="copyToClipboard()" [disabled]="!decryptForm.get('decryptedCode')?.value">
           <mat-icon>{{copiado ? 'check' : 'content_copy'}}</mat-icon>
         </button>
-        <textarea
-          formControlName="decryptedCode"
-          placeholder="Your decrypted code will appear here"
-          [ngClass]="{'focused': decryptedFocused}"
-          (focus)="decryptedFocused = true"
-          (blur)="decryptedFocused = false"
-          cdkTextareaAutosize
-          cdkAutosizeMinRows="3"
-          cdkAutosizeMaxRows="10"
-          readonly>
-          {{decryptForm.get('decryptedCode')?.value | json}}
-        </textarea>
+        <div class="textarea-container">
+          <pre #preContent class="pre-content">{{decryptForm.get('decryptedCode')?.value}}</pre>
+          <textarea
+            #decryptedTextarea
+            formControlName="decryptedCode"
+            placeholder="Your decrypted code will appear here"
+            [ngClass]="{'focused': decryptedFocused}"
+            (focus)="decryptedFocused = true"
+            (blur)="decryptedFocused = false"
+            readonly>
+          </textarea>
+        </div>
       </div>
     </div>
   </form>
+
   <div class="footer">
     V {{version}} | NST | {{currentYear}}
   </div>

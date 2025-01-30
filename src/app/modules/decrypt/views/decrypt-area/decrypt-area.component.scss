@@ -27,6 +27,8 @@
   }
 
   form {
+    display: flex;
+    flex-direction: column;
     flex: 1;
   }
 
@@ -35,11 +37,14 @@
     z-index: 6;
     display: flex;
     gap: 2rem;
+    height: 100%;
 
     .text-area-wrapper {
       flex: 1;
       text-align: center;
       position: relative;
+      display: flex;
+      flex-direction: column;
 
       .label-container {
         margin-bottom: 1rem;
@@ -90,6 +95,7 @@
         }
       }
 
+      // Estilos base para ambos textareas
       textarea {
         width: 100%;
         padding: 1rem;
@@ -98,10 +104,10 @@
         border-radius: 4px;
         color: var(--text-primary);
         font-family: inherit;
-        resize: vertical;
+        resize: none;
         transition: border-color 0.2s ease;
-        min-height: 120px;
-        text-align: left;
+        height: 360px;
+        overflow-y: auto;
 
         &.focused {
           border-color: #3CBCDD;
@@ -110,6 +116,49 @@
 
         &::placeholder {
           color: var(--text-secondary);
+        }
+
+        // Personalización del scrollbar
+        &::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        &::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+          background-color: #3CBCDD;
+          border-radius: 3px;
+
+          &:hover {
+            background-color: color.adjust(#3CBCDD, $lightness: -10%);
+          }
+        }
+      }
+
+      .textarea-container {
+        position: relative;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+
+        .pre-content {
+          position: absolute;
+          visibility: hidden;
+          padding: 1rem;
+          width: 100%;
+          font-family: inherit;
+          font-size: inherit;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          box-sizing: border-box;
+          margin: 0;
+          text-align: left;
+        }
+
+        textarea {
+          min-height: 360px;
         }
       }
 
@@ -170,7 +219,7 @@
   .footer {
     display: flex;
     justify-content: center;
-    padding: 2.5rem 0;
+    padding: 1.5rem 0;
     color: var(--text-tertiary);
     font-size: 0.875rem;
     margin-top: auto;
@@ -186,6 +235,14 @@
       gap: 1.5rem;
 
       .text-area-wrapper {
+        textarea {
+          height: 240px;
+        }
+
+        .textarea-container textarea {
+          min-height: 240px;
+        }
+
         .copy-btn {
           top: 5px;
           right: 0;
@@ -211,11 +268,6 @@
           }
         }
       }
-    }
-
-    .footer {
-      justify-content: center;
-      margin-top: 2rem;
     }
   }
 }
