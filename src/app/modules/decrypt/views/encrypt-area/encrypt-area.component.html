@@ -1,0 +1,64 @@
+<div class="encrypt-container">
+  <p class="subtitle">VASS</p>
+  <h1 class="title">Secure Encryption</h1>
+
+  <form [formGroup]="encryptForm">
+    <div class="text-areas-container">
+      <!-- Área de texto sin cifrar -->
+      <div class="text-area-wrapper">
+        <div class="label-container">
+          <label>Raw JSON</label>
+          <div class="line-container">
+            <div class="line"></div>
+          </div>
+        </div>
+        <textarea
+          formControlName="rawText"
+          placeholder="Paste your JSON here"
+          [ngClass]="{'focused': rawFocused}"
+          (focus)="rawFocused = true"
+          (blur)="rawFocused = false">
+        </textarea>
+        <div class="actions">
+          <button mat-flat-button class="encrypt-btn mobile-first" (click)="encrypt()" [disabled]="!encryptForm.get('rawText')?.value">
+            <mat-icon>lock</mat-icon>
+            Encrypt
+          </button>
+          <button mat-button class="clear-btn mobile-second" (click)="clearForm()">
+            <mat-icon>delete_outline</mat-icon>
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- Área de texto cifrado -->
+      <div class="text-area-wrapper">
+        <div class="label-container">
+          <label>Encrypted Code</label>
+          <div class="line-container">
+            <div class="line"></div>
+          </div>
+        </div>
+        <button mat-icon-button class="copy-btn" (click)="copyToClipboard()" [disabled]="!encryptForm.get('encryptedText')?.value">
+          <mat-icon>{{copiado ? 'check' : 'content_copy'}}</mat-icon>
+        </button>
+        <div class="textarea-container">
+          <pre #preContent class="pre-content">{{encryptForm.get('encryptedText')?.value}}</pre>
+          <textarea
+            #encryptedTextarea
+            formControlName="encryptedText"
+            placeholder="Your encrypted code will appear here"
+            [ngClass]="{'focused': encryptedFocused}"
+            (focus)="encryptedFocused = true"
+            (blur)="encryptedFocused = false"
+            readonly>
+          </textarea>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <div class="footer">
+    V {{version}} | NST | {{currentYear}}
+  </div>
+</div>
