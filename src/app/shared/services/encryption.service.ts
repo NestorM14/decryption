@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { from, Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import * as XLSX from 'xlsx';
 
 @Injectable({
   providedIn: 'root'
@@ -57,7 +58,6 @@ export class EncryptionService {
       return throwError(() => new Error('No hay claves de encriptación disponibles'));
     }
 
-    // Usamos la primera clave (principal) para encriptar
     return from((async () => {
       let encoded = new TextEncoder().encode(JSON.stringify(obj));
       let iv = window.crypto.getRandomValues(new Uint8Array(16));
@@ -86,6 +86,52 @@ export class EncryptionService {
       this.count++;
 
       return btoa(String.fromCharCode(...result));
+    })());
+  }
+
+  encryptBulk(data: any[]): Observable<string[]> {
+    if (this.claves.length === 0) {
+      return throwError(() => new Error('No hay claves de encriptación disponibles'));
+    }
+
+    return from((async () => {
+      const encryptedData: string[] = [];
+
+      for (const item of data) {
+        try {
+          let encoded = new TextEncoder().encode(JSON.stringify(item));
+          let iv = window.crypto.getRandomValues(new Uint8Array(16));
+          let aad = window.crypto.getRandomValues(new Uint8Array(16));
+
+          let ciphertext = await window.crypto.subtle.encrypt(
+            {
+              name: "AES-GCM",
+              iv: iv,
+              additionalData: aad,
+            },
+            this.claves[0],
+            encoded
+          );
+
+          const result = new Uint8Array(iv.length + ciphertext.byteLength + aad.length);
+          const cipherTextArray = new Uint8Array(ciphertext);
+          const tag = cipherTextArray.slice(cipherTextArray.length - 16, cipherTextArray.length);
+          const cipher = cipherTextArray.slice(0, cipherTextArray.length - 16);
+          result.set(iv);
+          result.set(aad, iv.length);
+          result.set(tag, aad.length + iv.length);
+          result.set(cipher, aad.length + iv.length + tag.length);
+
+          encryptedData.push(btoa(String.fromCharCode(...result)));
+          console.log('✅ ', this.count, 'Encrypted Item');
+          this.count++;
+        } catch (error) {
+          console.error('Error encrypting item:', error);
+          throw new Error('Error en el proceso de encriptación masiva');
+        }
+      }
+
+      return encryptedData;
     })());
   }
 
@@ -126,7 +172,6 @@ export class EncryptionService {
     }
 
     return from((async () => {
-      // Intentamos desencriptar con cada clave
       for (let i = 0; i < this.claves.length; i++) {
         const result = await this.tryDecrypt(encrypted, this.claves[i]);
         if (result !== null) {
@@ -135,8 +180,157 @@ export class EncryptionService {
         }
       }
 
-      // Si ninguna clave funcionó, lanzamos un error
       throw new Error('No se pudo desencriptar el mensaje con ninguna de las claves disponibles');
     })());
+  }
+
+  cleanRawData(rawData: string): any[] {
+    try {
+      // Primero intentamos ver si ya es un JSON válido
+      try {
+        const parsed = JSON.parse(rawData);
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+      } catch (e) {
+        // Si no es un JSON válido, continuamos con la limpieza
+      }
+
+      // Separar por líneas y limpiar
+      const lines = rawData.split('\n');
+      const cleanedObjects = [];
+      let currentObject: any = null;
+
+      for (let line of lines) {
+        line = line.trim();
+        if (!line) continue;
+
+        // Limpiar caracteres especiales y formato
+        line = line
+          .replace(/\\"/g, '"')     // Reemplazar \" por "
+          .replace(/^"/, '')        // Eliminar comillas del inicio
+          .replace(/"$/, '')        // Eliminar comillas del final
+          .replace(/""/g, '"')      // Reemplazar "" por "
+          .replace(/";/g, '",')     // Reemplazar "; por ",
+          .replace(/\s+/g, ' ')     // Normalizar espacios
+          .trim();
+
+        // Si la línea comienza con { es un nuevo objeto
+        if (line.startsWith('{')) {
+          currentObject = {};
+          const clientMatch = line.match(/"client"\s*:\s*{/);
+          if (clientMatch) {
+            currentObject.client = {};
+          }
+        }
+
+        // Extraer pares clave-valor
+        const matches = line.match(/"([^"]+)"\s*:\s*"([^"]+)"/g);
+        if (matches && currentObject?.client) {
+          matches.forEach(match => {
+            const [key, value] = match.split(':').map(part =>
+              part.trim().replace(/^"|"$/g, '')
+            );
+            currentObject.client[key] = value;
+          });
+        }
+
+        // Si la línea termina con }, el objeto está completo
+        if (line.endsWith('}') && currentObject) {
+          if (Object.keys(currentObject.client || {}).length > 0) {
+            cleanedObjects.push(currentObject);
+          }
+          currentObject = null;
+        }
+      }
+
+      // Validar y completar los objetos
+      return cleanedObjects.map((obj, index) => {
+        if (!obj.client) {
+          obj.client = {};
+        }
+
+        // Asegurar que todos los campos requeridos estén presentes
+        const clientNum = 2000 + index;
+        const defaultClient = {
+          identificationType: "Passport",
+          email: `cargaystresstbQA${clientNum}@yopmail.com`,
+          firstName: `cargaystress${clientNum}`,
+          middleName: `ONB${index + 1}`,
+          lastName1: `ACT DATOS${index + 1}`,
+          lastName2: `CARGAVASS${index + 1}`,
+          dateOfBirth: "1979-05-24",
+          idExpirationDate: "2029-05-31",
+          gender: 1,
+          nationality: 591,
+          placeOfBirth: 591,
+          phoneNumCode: "PA",
+          phoneNumber: "3121212"
+        };
+
+        // Mantener los valores existentes y completar los que faltan
+        obj.client = {
+          ...defaultClient,
+          ...obj.client
+        };
+
+        return obj;
+      });
+    } catch (error) {
+      console.error('Error limpiando datos:', error);
+      throw new Error('Error al procesar el JSON');
+    }
+  }
+
+  async readJsonFile(file: File): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = (e: any) => {
+        try {
+          const text = e.target.result;
+          const cleanedData = this.cleanRawData(text);
+          resolve(cleanedData);
+        } catch (error) {
+          console.error('Error processing file:', error);
+          reject(new Error('Error al procesar el archivo JSON'));
+        }
+      };
+
+      reader.onerror = (error) => {
+        console.error('FileReader error:', error);
+        reject(new Error('Error al leer el archivo'));
+      };
+
+      reader.readAsText(file);
+    });
+  }
+
+  exportToExcel(encryptedData: string[]): void {
+    try {
+      const worksheetData = encryptedData.map((data, index) => ({
+        index: index + 1,
+        encrypted_data: data
+      }));
+
+      const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(worksheetData);
+
+      // Ajustar el ancho de las columnas
+      const maxWidth = Math.max(...encryptedData.map(d => d.length));
+      worksheet['!cols'] = [
+        { wch: 10 },  // Index column
+        { wch: Math.min(maxWidth, 255) }  // Encrypted data column
+      ];
+
+      const workbook: XLSX.WorkBook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Encrypted Data');
+
+      // Generar el archivo Excel con timestamp
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      XLSX.writeFile(workbook, `encrypted_data_${timestamp}.xlsx`);
+    } catch (error) {
+      console.error('Error al exportar a Excel:', error);
+      throw new Error('Error al generar el archivo Excel');
+    }
   }
 }

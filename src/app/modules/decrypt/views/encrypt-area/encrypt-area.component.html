@@ -12,17 +12,33 @@
             <div class="line"></div>
           </div>
         </div>
+
+        <!-- Agregar input de archivo -->
+        <input
+          #fileInput
+          type="file"
+          accept=".json,.txt"
+          (change)="handleFileUpload($event)"
+          class="file-input"
+          style="margin-bottom: 1rem;"
+        >
+
         <textarea
           formControlName="rawText"
-          placeholder="Paste your JSON here"
+          placeholder="Paste your JSON here or upload a file"
           [ngClass]="{'focused': rawFocused}"
           (focus)="rawFocused = true"
           (blur)="rawFocused = false">
         </textarea>
+
         <div class="actions">
-          <button mat-flat-button class="encrypt-btn mobile-first" (click)="encrypt()" [disabled]="!encryptForm.get('rawText')?.value">
-            <mat-icon>lock</mat-icon>
-            Encrypt
+          <button
+            mat-flat-button
+            class="encrypt-btn mobile-first"
+            (click)="encrypt()"
+            [disabled]="!encryptForm.get('rawText')?.value || isProcessing">
+            <mat-icon>{{isProcessing ? 'hourglass_empty' : 'lock'}}</mat-icon>
+            {{isProcessing ? 'Processing...' : 'Encrypt & Export'}}
           </button>
           <button mat-button class="clear-btn mobile-second" (click)="clearForm()">
             <mat-icon>delete_outline</mat-icon>
@@ -39,7 +55,11 @@
             <div class="line"></div>
           </div>
         </div>
-        <button mat-icon-button class="copy-btn" (click)="copyToClipboard()" [disabled]="!encryptForm.get('encryptedText')?.value">
+        <button
+          mat-icon-button
+          class="copy-btn"
+          (click)="copyToClipboard()"
+          [disabled]="!encryptForm.get('encryptedText')?.value">
           <mat-icon>{{copiado ? 'check' : 'content_copy'}}</mat-icon>
         </button>
         <div class="textarea-container">
