@@ -186,98 +186,82 @@ export class EncryptionService {
 
   cleanRawData(rawData: string): any[] {
     try {
-      // Primero intentamos ver si ya es un JSON válido
-      try {
-        const parsed = JSON.parse(rawData);
-        if (Array.isArray(parsed)) {
+      // Split the data into individual JSON objects
+      const jsonObjects = rawData
+        .split(/(?=\{\s*"client")/g)  // Split on start of new client object
+        .map(str => str.trim())
+        .filter(str => str.length > 0);
+
+      // Process each object
+      const cleanedObjects = jsonObjects.map((jsonStr, index) => {
+        try {
+          // Fix common JSON formatting issues
+          let fixedJson = jsonStr
+            .replace(/,\s*}/g, '}')  // Remove trailing commas
+            .replace(/([^":\s])"([^":\s])/g, '$1\\"$2')  // Escape quotes in values
+            .replace(/middleName":/g, '"middleName":')  // Fix middleName quotes
+            .replace(/firstName":/g, '"firstName":')  // Fix firstName quotes
+            .replace(/}\s*{/g, '}')  // Remove any concatenated objects
+            .replace(/\}\s*\n*\s*\}/g, '}')  // Fix double closing brackets
+            .replace(/\}\s*$/g, '}');  // Ensure single closing bracket at end
+
+          // Parse the fixed JSON
+          const parsed = JSON.parse(fixedJson);
+
+          // Ensure client object structure
+          if (!parsed.client) {
+            parsed.client = {};
+          }
+
+          // Add default values if missing
+          const defaultClient = {
+            identificationType: "Passport",
+            email: `cargaystresstbQA${2000 + index}@yopmail.com`,
+            firstName: `cargaystress${2000 + index}`,
+            middleName: `ONB${index + 1}`,
+            lastName1: `ACT DATOS${index + 1}`,
+            lastName2: `CARGAVASS${index + 1}`,
+            dateOfBirth: "1979-05-24",
+            idExpirationDate: "2029-05-31",
+            gender: 1,
+            nationality: 591,
+            placeOfBirth: 591,
+            phoneNumCode: "PA",
+            phoneNumber: "3121212"
+          };
+
+          parsed.client = {
+            ...defaultClient,
+            ...parsed.client
+          };
+
           return parsed;
+        } catch (e) {
+          console.warn(`Error parsing object at index ${index}:`, e);
+          // Return a default object if parsing fails
+          return {
+            client: {
+              identificationType: "Passport",
+              email: `cargaystresstbQA${2000 + index}@yopmail.com`,
+              firstName: `cargaystress${2000 + index}`,
+              middleName: `ONB${index + 1}`,
+              lastName1: `ACT DATOS${index + 1}`,
+              lastName2: `CARGAVASS${index + 1}`,
+              dateOfBirth: "1979-05-24",
+              idExpirationDate: "2029-05-31",
+              gender: 1,
+              nationality: 591,
+              placeOfBirth: 591,
+              phoneNumCode: "PA",
+              phoneNumber: "3121212"
+            }
+          };
         }
-      } catch (e) {
-        // Si no es un JSON válido, continuamos con la limpieza
-      }
-
-      // Separar por líneas y limpiar
-      const lines = rawData.split('\n');
-      const cleanedObjects = [];
-      let currentObject: any = null;
-
-      for (let line of lines) {
-        line = line.trim();
-        if (!line) continue;
-
-        // Limpiar caracteres especiales y formato
-        line = line
-          .replace(/\\"/g, '"')     // Reemplazar \" por "
-          .replace(/^"/, '')        // Eliminar comillas del inicio
-          .replace(/"$/, '')        // Eliminar comillas del final
-          .replace(/""/g, '"')      // Reemplazar "" por "
-          .replace(/";/g, '",')     // Reemplazar "; por ",
-          .replace(/\s+/g, ' ')     // Normalizar espacios
-          .trim();
-
-        // Si la línea comienza con { es un nuevo objeto
-        if (line.startsWith('{')) {
-          currentObject = {};
-          const clientMatch = line.match(/"client"\s*:\s*{/);
-          if (clientMatch) {
-            currentObject.client = {};
-          }
-        }
-
-        // Extraer pares clave-valor
-        const matches = line.match(/"([^"]+)"\s*:\s*"([^"]+)"/g);
-        if (matches && currentObject?.client) {
-          matches.forEach(match => {
-            const [key, value] = match.split(':').map(part =>
-              part.trim().replace(/^"|"$/g, '')
-            );
-            currentObject.client[key] = value;
-          });
-        }
-
-        // Si la línea termina con }, el objeto está completo
-        if (line.endsWith('}') && currentObject) {
-          if (Object.keys(currentObject.client || {}).length > 0) {
-            cleanedObjects.push(currentObject);
-          }
-          currentObject = null;
-        }
-      }
-
-      // Validar y completar los objetos
-      return cleanedObjects.map((obj, index) => {
-        if (!obj.client) {
-          obj.client = {};
-        }
-
-        // Asegurar que todos los campos requeridos estén presentes
-        const clientNum = 2000 + index;
-        const defaultClient = {
-          identificationType: "Passport",
-          email: `cargaystresstbQA${clientNum}@yopmail.com`,
-          firstName: `cargaystress${clientNum}`,
-          middleName: `ONB${index + 1}`,
-          lastName1: `ACT DATOS${index + 1}`,
-          lastName2: `CARGAVASS${index + 1}`,
-          dateOfBirth: "1979-05-24",
-          idExpirationDate: "2029-05-31",
-          gender: 1,
-          nationality: 591,
-          placeOfBirth: 591,
-          phoneNumCode: "PA",
-          phoneNumber: "3121212"
-        };
-
-        // Mantener los valores existentes y completar los que faltan
-        obj.client = {
-          ...defaultClient,
-          ...obj.client
-        };
-
-        return obj;
       });
+
+      return cleanedObjects;
     } catch (error) {
-      console.error('Error limpiando datos:', error);
+      console.error('Error cleaning data:', error);
       throw new Error('Error al procesar el JSON');
     }
   }

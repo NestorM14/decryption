@@ -1,4 +1,4 @@
-// app.component.scss
+/* app.component.scss */
 .app-container {
   min-height: 100vh;
   width: 100%;
@@ -7,7 +7,26 @@
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
-  overflow: hidden; // Importante para evitar scroll doble
+  overflow: hidden;
+}
+
+.title, .subtitle {
+  position: relative;
+  z-index: 6;
+  text-align: center;
+}
+
+.title {
+  color: var(--text-primary);
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.subtitle {
+  color: var(--text-tertiary);
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
 }
 
 .gradient-overlay {
@@ -17,6 +36,43 @@
   height: 480px;
   background: var(--dark-gradient);
   pointer-events: none;
+}
+
+.buttons-container {
+  display: flex;
+  justify-content: center;
+  margin: 2rem auto;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  padding: 4px;
+  width: fit-content;
+}
+
+.action-button {
+  padding: 0.75rem 1.5rem;
+  background-color: rgba(34, 34, 34, 0.1);
+  color: var(--text-primary);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  border-radius: 6px;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  &.active {
+    background-color: rgba(255, 255, 255, 0.25);
+  }
+
+  i {
+    font-size: 1.1rem;
+  }
 }
 
 @media (max-width: 768px) {

@@ -1,10 +1,7 @@
+<!-- encrypt-area.component.html -->
 <div class="encrypt-container">
-  <p class="subtitle">VASS</p>
-  <h1 class="title">Secure Encryption</h1>
-
   <form [formGroup]="encryptForm">
     <div class="text-areas-container">
-      <!-- Área de texto sin cifrar -->
       <div class="text-area-wrapper">
         <div class="label-container">
           <label>Raw JSON</label>
@@ -13,19 +10,18 @@
           </div>
         </div>
 
-        <!-- Agregar input de archivo -->
         <input
           #fileInput
           type="file"
           accept=".json,.txt"
           (change)="handleFileUpload($event)"
           class="file-input"
-          style="margin-bottom: 1rem;"
+          hidden
         >
 
         <textarea
           formControlName="rawText"
-          placeholder="Paste your JSON here or upload a file"
+          placeholder="Paste your JSON here or select a file"
           [ngClass]="{'focused': rawFocused}"
           (focus)="rawFocused = true"
           (blur)="rawFocused = false">
@@ -35,10 +31,10 @@
           <button
             mat-flat-button
             class="encrypt-btn mobile-first"
-            (click)="encrypt()"
-            [disabled]="!encryptForm.get('rawText')?.value || isProcessing">
-            <mat-icon>{{isProcessing ? 'hourglass_empty' : 'lock'}}</mat-icon>
-            {{isProcessing ? 'Processing...' : 'Encrypt & Export'}}
+            (click)="fileInput.click()"
+            [disabled]="isProcessing">
+            <mat-icon>{{isProcessing ? 'hourglass_empty' : 'upload_file'}}</mat-icon>
+            {{isProcessing ? 'Processing...' : 'Select & Process File'}}
           </button>
           <button mat-button class="clear-btn mobile-second" (click)="clearForm()">
             <mat-icon>delete_outline</mat-icon>
@@ -47,7 +43,6 @@
         </div>
       </div>
 
-      <!-- Área de texto cifrado -->
       <div class="text-area-wrapper">
         <div class="label-container">
           <label>Encrypted Code</label>

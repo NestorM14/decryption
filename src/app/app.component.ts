@@ -6,21 +6,34 @@ import * as packageJson from './../../package.json';
 import { HeaderComponent } from "./modules/decrypt/views/header/header.component";
 import { EncryptAreaComponent } from "./modules/decrypt/views/encrypt-area/encrypt-area.component";
 import { DecryptAreaComponent } from "./modules/decrypt/views/decrypt-area/decrypt-area.component";
+import { MaterialModule } from './shared/material.module';
 
 @Component({
     selector: 'app-root',
-    imports: [CommonModule, ReactiveFormsModule, HeaderComponent, DecryptAreaComponent, EncryptAreaComponent],
+    imports: [CommonModule, MaterialModule, ReactiveFormsModule, HeaderComponent, DecryptAreaComponent, EncryptAreaComponent],
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'Decrypted';
-  dataDesencriptada: any;
-  version = packageJson.version;
-  encryptedCode = new FormControl('');
-  copiado: boolean = false;
-  private timeoutId: any;
-  private encryptionService = inject(EncryptionService);
+  public title = 'Decrypted';
+  public dataDesencriptada: any;
+  public showEncryptArea = true;
+  public copiado: boolean = false;
+  public version = packageJson.version;
+  public encryptedCode = new FormControl('');
+
+  private _timeoutId: any;
+  private _encryptionSrv = inject(EncryptionService);
+
+  showEncrypt() {
+    this.title = 'Encrypted';
+    this.showEncryptArea = true;
+  }
+
+  showDecrypt() {
+    this.title = 'Decrypted';
+    this.showEncryptArea = false;
+  }
 
   limpiar() {
     this.encryptedCode.reset();
@@ -33,12 +46,12 @@ export class AppComponent {
       this.copiado = true;
 
       // Limpiar cualquier timeout existente
-      if (this.timeoutId) {
-        clearTimeout(this.timeoutId);
+      if (this._timeoutId) {
+        clearTimeout(this._timeoutId);
       }
 
       // Restaurar el icono después de 2 segundos
-      this.timeoutId = setTimeout(() => {
+      this._timeoutId = setTimeout(() => {
         this.copiado = false;
       }, 2000);
     });
@@ -50,7 +63,7 @@ export class AppComponent {
       const encryptedData = this.extractEncryptedCode(code);
 
       if (encryptedData) {
-        this.encryptionService.decryptMessage(encryptedData).subscribe(
+        this._encryptionSrv.decryptMessage(encryptedData).subscribe(
           (data) => {
             this.dataDesencriptada = data;
           },

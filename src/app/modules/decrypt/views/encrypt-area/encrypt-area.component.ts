@@ -75,12 +75,25 @@ export class EncryptAreaComponent implements OnInit, AfterViewInit {
         this.encryptForm.patchValue({
           rawText: JSON.stringify(jsonData, null, 2)
         });
+
+        this._encryptionSrv.encryptBulk(Array.isArray(jsonData) ? jsonData : [jsonData]).subscribe({
+          next: (encryptedDataArray) => {
+            this._encryptionSrv.exportToExcel(encryptedDataArray);
+            this.encryptForm.patchValue({
+              encryptedText: JSON.stringify(encryptedDataArray, null, 2)
+            });
+            this.isProcessing = false;
+          },
+          error: (error) => {
+            console.error('Error al procesar:', error);
+            this.isProcessing = false;
+          }
+        });
       } catch (error) {
         console.error('Error al leer el archivo:', error);
         this.encryptForm.patchValue({
           encryptedText: 'Error al leer el archivo JSON'
         });
-      } finally {
         this.isProcessing = false;
       }
     }
