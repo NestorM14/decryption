@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { JsonCleanerService } from './json-cleaner.service';
+import { Injectable, inject } from '@angular/core';
 import { from, Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import * as XLSX from 'xlsx';
@@ -15,6 +16,8 @@ export class EncryptionService {
     environment.keyEncryptDev, // Clave principal - DEV / QA
     environment.keyEncryptProd // Clave secundaria - PRODUCTION
   ];
+
+  private _jsonCleaner = inject(JsonCleanerService);
 
   constructor() {
     this.importarClaves();
@@ -94,11 +97,25 @@ export class EncryptionService {
       return throwError(() => new Error('No hay claves de encriptación disponibles'));
     }
 
+    // Validar cada item antes de procesar
+    const invalidItems = data.filter(item => !this.validateBeforeEncrypt(item));
+    if (invalidItems.length > 0) {
+      console.warn(`Se encontraron ${invalidItems.length} items con formato JSON inválido`);
+      data = data.map(item => {
+        if (!this.validateBeforeEncrypt(item)) {
+          return this._jsonCleaner.cleanRawData(JSON.stringify(item));
+        }
+        return item;
+      });
+    }
+
     return from((async () => {
       const encryptedData: string[] = [];
 
       for (const item of data) {
         try {
+          console.log('🔄 Procesando item:', JSON.stringify(item));
+
           let encoded = new TextEncoder().encode(JSON.stringify(item));
           let iv = window.crypto.getRandomValues(new Uint8Array(16));
           let aad = window.crypto.getRandomValues(new Uint8Array(16));
@@ -122,8 +139,10 @@ export class EncryptionService {
           result.set(tag, aad.length + iv.length);
           result.set(cipher, aad.length + iv.length + tag.length);
 
-          encryptedData.push(btoa(String.fromCharCode(...result)));
-          console.log('✅ ', this.count, 'Encrypted Item');
+          const encryptedResult = btoa(String.fromCharCode(...result));
+          encryptedData.push(encryptedResult);
+
+          console.log('✅ Item encriptado:', encryptedData.length);
           this.count++;
         } catch (error) {
           console.error('Error encrypting item:', error);
@@ -184,111 +203,37 @@ export class EncryptionService {
     })());
   }
 
-  cleanRawData(rawData: string): any[] {
+  cleanRawData(rawData: string): any {
+    return this._jsonCleaner.cleanRawData(rawData);
+  }
+
+  async readJsonFile(file: File): Promise<any> {
     try {
-      // Split the data into individual JSON objects
-      const jsonObjects = rawData
-        .split(/(?=\{\s*"client")/g)  // Split on start of new client object
-        .map(str => str.trim())
-        .filter(str => str.length > 0);
+      const cleanedData = await this._jsonCleaner.readJsonFile(file);
 
-      // Process each object
-      const cleanedObjects = jsonObjects.map((jsonStr, index) => {
-        try {
-          // Fix common JSON formatting issues
-          let fixedJson = jsonStr
-            .replace(/,\s*}/g, '}')  // Remove trailing commas
-            .replace(/([^":\s])"([^":\s])/g, '$1\\"$2')  // Escape quotes in values
-            .replace(/middleName":/g, '"middleName":')  // Fix middleName quotes
-            .replace(/firstName":/g, '"firstName":')  // Fix firstName quotes
-            .replace(/}\s*{/g, '}')  // Remove any concatenated objects
-            .replace(/\}\s*\n*\s*\}/g, '}')  // Fix double closing brackets
-            .replace(/\}\s*$/g, '}');  // Ensure single closing bracket at end
+      // Si los datos son un array, procesarlos directamente
+      if (Array.isArray(cleanedData)) {
+        return cleanedData;
+      }
 
-          // Parse the fixed JSON
-          const parsed = JSON.parse(fixedJson);
-
-          // Ensure client object structure
-          if (!parsed.client) {
-            parsed.client = {};
-          }
-
-          // Add default values if missing
-          const defaultClient = {
-            identificationType: "Passport",
-            email: `cargaystresstbQA${2000 + index}@yopmail.com`,
-            firstName: `cargaystress${2000 + index}`,
-            middleName: `ONB${index + 1}`,
-            lastName1: `ACT DATOS${index + 1}`,
-            lastName2: `CARGAVASS${index + 1}`,
-            dateOfBirth: "1979-05-24",
-            idExpirationDate: "2029-05-31",
-            gender: 1,
-            nationality: 591,
-            placeOfBirth: 591,
-            phoneNumCode: "PA",
-            phoneNumber: "3121212"
-          };
-
-          parsed.client = {
-            ...defaultClient,
-            ...parsed.client
-          };
-
-          return parsed;
-        } catch (e) {
-          console.warn(`Error parsing object at index ${index}:`, e);
-          // Return a default object if parsing fails
-          return {
-            client: {
-              identificationType: "Passport",
-              email: `cargaystresstbQA${2000 + index}@yopmail.com`,
-              firstName: `cargaystress${2000 + index}`,
-              middleName: `ONB${index + 1}`,
-              lastName1: `ACT DATOS${index + 1}`,
-              lastName2: `CARGAVASS${index + 1}`,
-              dateOfBirth: "1979-05-24",
-              idExpirationDate: "2029-05-31",
-              gender: 1,
-              nationality: 591,
-              placeOfBirth: 591,
-              phoneNumCode: "PA",
-              phoneNumber: "3121212"
-            }
-          };
-        }
-      });
-
-      return cleanedObjects;
+      // Si es un objeto individual, envolverlo en un array
+      return [cleanedData];
     } catch (error) {
-      console.error('Error cleaning data:', error);
-      throw new Error('Error al procesar el JSON');
+      console.error('Error al procesar el archivo:', error);
+      throw new Error('Error al procesar el archivo JSON: ' + (error as any).message);
     }
   }
 
-  async readJsonFile(file: File): Promise<any[]> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = (e: any) => {
-        try {
-          const text = e.target.result;
-          const cleanedData = this.cleanRawData(text);
-          resolve(cleanedData);
-        } catch (error) {
-          console.error('Error processing file:', error);
-          reject(new Error('Error al procesar el archivo JSON'));
-        }
-      };
-
-      reader.onerror = (error) => {
-        console.error('FileReader error:', error);
-        reject(new Error('Error al leer el archivo'));
-      };
-
-      reader.readAsText(file);
-    });
+  validateBeforeEncrypt(data: any): boolean {
+    try {
+      // Convertir a string si es un objeto
+      const jsonStr = typeof data === 'string' ? data : JSON.stringify(data);
+      return this._jsonCleaner.isValidJson(jsonStr);
+    } catch (error) {
+      return false;
+    }
   }
+
 
   exportToExcel(encryptedData: string[]): void {
     try {
