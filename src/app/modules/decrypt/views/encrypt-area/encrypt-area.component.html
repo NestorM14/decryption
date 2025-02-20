@@ -1,4 +1,3 @@
-<!-- encrypt-area.component.html -->
 <div class="encrypt-container">
   <form [formGroup]="encryptForm">
     <div class="text-areas-container">
@@ -19,13 +18,48 @@
           hidden
         >
 
-        <textarea
-          formControlName="rawText"
-          placeholder="Paste your JSON here or select a file"
-          [ngClass]="{'focused': rawFocused}"
-          (focus)="rawFocused = true"
-          (blur)="rawFocused = false">
-        </textarea>
+        <div
+          #dropZone
+          class="drop-zone"
+          [class.dragging]="isDragging"
+          [class.focused]="rawFocused"
+          [class.processing]="isProcessing"
+          [class.has-file]="encryptForm.get('rawText')?.value"
+          (click)="onDropZoneClick()"
+        >
+          <div class="drop-zone-content">
+            <div class="drop-zone-icon">
+              <mat-icon>{{isProcessing ? 'hourglass_empty' : (encryptForm.get('rawText')?.value ? 'check_circle' : 'upload_file')}}</mat-icon>
+            </div>
+            <div class="drop-zone-text">
+              <ng-container *ngIf="!isProcessing && !encryptForm.get('rawText')?.value">
+                <p class="primary-text">Drag and Drop your JSON or TXT file here</p>
+                <p class="secondary-text">or paste your JSON content</p>
+              </ng-container>
+              <ng-container *ngIf="isProcessing">
+                <p class="primary-text">Processing file...</p>
+                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+              </ng-container>
+              <ng-container *ngIf="!isProcessing && encryptForm.get('rawText')?.value">
+                <p class="primary-text">File ready for encryption</p>
+                <p class="secondary-text">You can drag a new file to replace it</p>
+              </ng-container>
+            </div>
+          </div>
+
+          <div class="error-message" *ngIf="hasJsonError">
+            <mat-icon>error_outline</mat-icon>
+            {{ jsonErrorMessage }}
+          </div>
+
+          <!-- Hidden textarea for functionality -->
+          <textarea
+            formControlName="rawText"
+            [placeholder]="''"
+            class="hidden-textarea"
+            (paste)="onPaste($event)"
+          ></textarea>
+        </div>
 
         <div class="actions">
           <button
@@ -36,13 +70,18 @@
             <mat-icon>{{isProcessing ? 'hourglass_empty' : 'upload_file'}}</mat-icon>
             {{isProcessing ? 'Processing...' : 'Select & Process File'}}
           </button>
-          <button mat-button class="clear-btn mobile-second" (click)="clearForm()">
+          <button
+            mat-button
+            class="clear-btn mobile-second"
+            (click)="clearForm()"
+            [disabled]="isProcessing">
             <mat-icon>delete_outline</mat-icon>
             Clear
           </button>
         </div>
       </div>
 
+      <!-- Area Encrypted (sin cambios) -->
       <div class="text-area-wrapper">
         <div class="label-container">
           <label>Encrypted Code</label>

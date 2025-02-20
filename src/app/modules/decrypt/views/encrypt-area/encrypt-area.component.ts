@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, ViewChild, ElementRef, OnInit, AfterViewInit } from '@angular/core';
+import { Component, inject, ViewChild, ElementRef, OnInit, AfterViewInit, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MaterialModule } from '../../../../shared/material.module';
 import * as packageJson from './../../../../../../package.json';
@@ -16,6 +16,7 @@ export class EncryptAreaComponent implements OnInit, AfterViewInit {
   @ViewChild('preContent') preContent!: ElementRef;
   @ViewChild('encryptedTextarea') encryptedTextarea!: ElementRef;
   @ViewChild('fileInput') fileInput!: ElementRef;
+  @ViewChild('dropZone') dropZone!: ElementRef;
 
   encryptForm!: FormGroup;
   rawFocused = false;
@@ -25,12 +26,50 @@ export class EncryptAreaComponent implements OnInit, AfterViewInit {
   isProcessing: boolean = false;
   hasJsonError: boolean = false;
   jsonErrorMessage: string = '';
+  isDragging: boolean = false;
 
   currentYear = new Date().getFullYear();
 
   private _timeoutId: any;
   private _fb = inject(FormBuilder);
   private _encryptionSrv = inject(EncryptionService);
+
+  // Event listeners para drag & drop
+  @HostListener('dragover', ['$event'])
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!this.isProcessing) {
+      this.isDragging = true;
+    }
+  }
+
+  @HostListener('dragleave', ['$event'])
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+  }
+
+  @HostListener('drop', ['$event'])
+  async onDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+
+    if (this.isProcessing) return;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (this.isValidFileType(file)) {
+        await this.handleFileUpload({ target: { files: [file] } });
+      } else {
+        this.hasJsonError = true;
+        this.jsonErrorMessage = 'Invalid file type. Please use .json or .txt files only.';
+      }
+    }
+  }
 
   ngOnInit() {
     this.encryptForm = this._fb.group({
@@ -42,14 +81,14 @@ export class EncryptAreaComponent implements OnInit, AfterViewInit {
       setTimeout(() => this.adjustTextareaHeight(), 0);
     });
 
-    // Real-time JSON validation
+    // Validación de JSON en tiempo real
     this.encryptForm.get('rawText')?.valueChanges.subscribe(value => {
       if (value) {
         try {
           const processedData = this.processInputData(value);
           this.hasJsonError = false;
           this.jsonErrorMessage = '';
-          // Update field with cleaned JSON
+          // Actualizar campo con JSON procesado
           this.encryptForm.patchValue({
             rawText: JSON.stringify(processedData, null, 2)
           }, { emitEvent: false });
@@ -81,6 +120,11 @@ export class EncryptAreaComponent implements OnInit, AfterViewInit {
     }
   }
 
+  private isValidFileType(file: File): boolean {
+    const validTypes = ['.json', '.txt'];
+    return validTypes.some(type => file.name.toLowerCase().endsWith(type));
+  }
+
   clearForm() {
     this.encryptForm.reset();
     if (this.fileInput) {
@@ -92,13 +136,13 @@ export class EncryptAreaComponent implements OnInit, AfterViewInit {
 
   private processInputData(input: string): any {
     try {
-      // Primero intentar parsear como un array JSON válido
+      // Primero intentar parsear como array JSON
       const trimmedInput = input.trim();
       if (trimmedInput.startsWith('[') && trimmedInput.endsWith(']')) {
         return JSON.parse(trimmedInput);
       }
 
-      // Si no es un array, intentar procesar como objetos múltiples
+      // Si no es array, procesar como objetos múltiples
       return this.parseMultipleObjects(input);
     } catch (e) {
       console.error('Error processing input:', e);
@@ -111,20 +155,20 @@ export class EncryptAreaComponent implements OnInit, AfterViewInit {
 
     // Dividir por saltos de línea y limpiar líneas vacías
     const lines = input
-      .split(/\r?\n/)                    // Dividir por cualquier tipo de salto de línea
-      .map(line => line.trim())          // Limpiar espacios
-      .filter(line => line.length > 0);   // Eliminar líneas vacías
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
 
     for (const line of lines) {
       try {
-        // Validar que la línea parece un objeto JSON
+        // Validar que la línea es un objeto JSON
         if (line.startsWith('{') && line.endsWith('}')) {
           const parsed = JSON.parse(line);
           if (typeof parsed === 'object' && parsed !== null) {
             objects.push(parsed);
           }
         } else {
-          // Intentar reparar el objeto si no está bien formado
+          // Intentar reparar el objeto si es necesario
           let fixedLine = line;
           if (!fixedLine.startsWith('{')) fixedLine = '{' + fixedLine;
           if (!fixedLine.endsWith('}')) fixedLine = fixedLine + '}';
@@ -136,12 +180,11 @@ export class EncryptAreaComponent implements OnInit, AfterViewInit {
         }
       } catch (e) {
         console.warn('Failed to parse line:', line);
-        // Continuar con la siguiente línea en caso de error
       }
     }
 
     if (objects.length === 0) {
-      throw new Error('No se encontraron objetos JSON válidos en el archivo');
+      throw new Error('No valid JSON objects found in the input');
     }
 
     return objects;
@@ -153,17 +196,16 @@ export class EncryptAreaComponent implements OnInit, AfterViewInit {
       reader.onload = (e) => {
         try {
           const content = e.target?.result as string;
-          // Limpiar BOM y otros caracteres especiales
           const cleanContent = content
             .replace(/^\uFEFF/, '')     // Eliminar BOM
             .replace(/\r\n/g, '\n')     // Normalizar saltos de línea Windows
             .replace(/\r/g, '\n');      // Normalizar saltos de línea Mac
           resolve(cleanContent);
         } catch (error) {
-          reject(new Error('Error al limpiar el contenido del archivo'));
+          reject(new Error('Error cleaning file content'));
         }
       };
-      reader.onerror = () => reject(new Error('Error al leer el archivo'));
+      reader.onerror = () => reject(new Error('Error reading file'));
       reader.readAsText(file);
     });
   }
@@ -179,17 +221,15 @@ export class EncryptAreaComponent implements OnInit, AfterViewInit {
         const fileContent = await this.readFileContent(file);
         const processedData = this.processInputData(fileContent);
 
-        // Mostrar en el área de texto raw los datos procesados
         this.encryptForm.patchValue({
           rawText: JSON.stringify(processedData, null, 2)
         });
 
-        // Procesar para encriptación
         this.processDataForEncryption(processedData);
       } catch (error: any) {
-        console.error('Error al procesar el archivo:', error);
+        console.error('Error processing file:', error);
         this.hasJsonError = true;
-        this.jsonErrorMessage = error.message || 'Error al procesar el archivo JSON';
+        this.jsonErrorMessage = error.message || 'Error processing JSON file';
         this.encryptForm.patchValue({
           encryptedText: this.jsonErrorMessage
         });
@@ -199,25 +239,23 @@ export class EncryptAreaComponent implements OnInit, AfterViewInit {
   }
 
   private processDataForEncryption(data: any) {
-    // Asegurar que data sea siempre un array
     const dataToProcess = Array.isArray(data) ? data : [data];
 
-    // Filtrar objetos válidos
+    // Validar objetos antes de procesar
     const validData = dataToProcess.filter(item => {
       return typeof item === 'object' &&
-          item !== null &&
-          Object.keys(item).length > 0;
+        item !== null &&
+        Object.keys(item).length > 0;
     });
 
     if (validData.length === 0) {
       this.hasJsonError = true;
-      this.jsonErrorMessage = 'No se encontraron datos válidos para procesar';
+      this.jsonErrorMessage = 'No valid data found to process';
       this.isProcessing = false;
       return;
     }
 
-    // Mostrar información de procesamiento
-    console.log(`Procesando ${validData.length} objetos válidos`);
+    console.log(`Processing ${validData.length} valid objects`);
 
     this._encryptionSrv.encryptBulk(validData).subscribe({
       next: (encryptedDataArray) => {
@@ -231,9 +269,9 @@ export class EncryptAreaComponent implements OnInit, AfterViewInit {
         this.isProcessing = false;
       },
       error: (error) => {
-        console.error('Error en la encriptación:', error);
+        console.error('Encryption error:', error);
         this.hasJsonError = true;
-        this.jsonErrorMessage = error.message || 'Error en el proceso de encriptación';
+        this.jsonErrorMessage = error.message || 'Encryption process error';
         this.encryptForm.patchValue({
           encryptedText: this.jsonErrorMessage
         });
@@ -242,26 +280,22 @@ export class EncryptAreaComponent implements OnInit, AfterViewInit {
     });
   }
 
-  encrypt() {
-    if (this.hasJsonError) {
-      return;
+  onDropZoneClick(): void {
+    if (!this.isProcessing) {
+      this.fileInput.nativeElement.click();
     }
+  }
 
-    this.isProcessing = true;
-    const text = this.encryptForm.get('rawText')?.value;
-
-    if (text) {
+  onPaste(event: ClipboardEvent) {
+    const clipboardData = event.clipboardData?.getData('text');
+    if (clipboardData) {
       try {
-        // Usar el servicio de limpieza antes de procesar
-        const cleanedData = this._encryptionSrv.cleanRawData(text);
-        this.processDataForEncryption(cleanedData);
-      } catch (error: any) {
-        this.hasJsonError = true;
-        this.jsonErrorMessage = error.message || 'Error al procesar el JSON';
+        const processedData = this.processInputData(clipboardData);
         this.encryptForm.patchValue({
-          encryptedText: this.jsonErrorMessage
+          rawText: JSON.stringify(processedData, null, 2)
         });
-        this.isProcessing = false;
+      } catch (error) {
+        // El manejo de errores existente se ocupará de esto
       }
     }
   }
@@ -274,6 +308,29 @@ export class EncryptAreaComponent implements OnInit, AfterViewInit {
         if (this._timeoutId) clearTimeout(this._timeoutId);
         this._timeoutId = setTimeout(() => this.copiado = false, 2000);
       });
+    }
+  }
+
+  encrypt() {
+    if (this.hasJsonError) {
+      return;
+    }
+
+    this.isProcessing = true;
+    const text = this.encryptForm.get('rawText')?.value;
+
+    if (text) {
+      try {
+        const processedData = this.processInputData(text);
+        this.processDataForEncryption(processedData);
+      } catch (error: any) {
+        this.hasJsonError = true;
+        this.jsonErrorMessage = error.message || 'Error processing JSON';
+        this.encryptForm.patchValue({
+          encryptedText: this.jsonErrorMessage
+        });
+        this.isProcessing = false;
+      }
     }
   }
 }
