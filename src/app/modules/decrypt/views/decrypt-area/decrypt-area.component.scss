@@ -77,6 +77,118 @@
         }
       }
 
+      .input-area {
+        position: relative;
+        width: 100%;
+
+        &.processing {
+          textarea {
+            opacity: 0.6;
+            pointer-events: none;
+          }
+        }
+
+        .processing-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: rgba(17, 17, 17, 0.7);
+          border-radius: 4px;
+          z-index: 5;
+
+          .processing-content {
+            text-align: center;
+            padding: 2rem;
+
+            .processing-icon {
+              font-size: 48px;
+              width: 48px;
+              height: 48px;
+              color: #3CBCDD;
+              margin-bottom: 1rem;
+              animation: pulse 1.5s infinite;
+            }
+
+            p {
+              color: var(--text-primary);
+              font-size: 1.2rem;
+              margin-bottom: 1rem;
+            }
+
+            mat-progress-bar {
+              width: 200px;
+            }
+          }
+        }
+
+        .error-message {
+          position: absolute;
+          bottom: 1rem;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          color: #ff4444;
+          background-color: rgba(255, 68, 68, 0.1);
+          padding: 0.5rem 1rem;
+          border-radius: 4px;
+          font-size: 0.9rem;
+          z-index: 3;
+
+          mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+        }
+
+        textarea {
+          width: 100%;
+          padding: 1rem;
+          background-color: rgba(17, 17, 17, 0.3);
+          border: 1px solid var(--text-tertiary);
+          border-radius: 4px;
+          color: var(--text-primary);
+          font-family: inherit;
+          resize: none;
+          transition: all 0.3s ease;
+          height: 360px;
+          overflow-y: auto;
+
+          &.focused {
+            border-color: #3CBCDD;
+            outline: none;
+          }
+
+          &::placeholder {
+            color: var(--text-secondary);
+          }
+
+          &::-webkit-scrollbar {
+            width: 6px;
+          }
+
+          &::-webkit-scrollbar-track {
+            background: transparent;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background-color: #3CBCDD;
+            border-radius: 3px;
+
+            &:hover {
+              background-color: color.adjust(#3CBCDD, $lightness: -10%);
+            }
+          }
+        }
+      }
+
       .copy-btn {
         position: absolute;
         top: 5px;
@@ -92,48 +204,6 @@
           font-size: 20px;
           width: 20px;
           height: 20px;
-        }
-      }
-
-      // Estilos base para ambos textareas
-      textarea {
-        width: 100%;
-        padding: 1rem;
-        background-color: rgba(17, 17, 17, 0.3);
-        border: 1px solid var(--text-tertiary);
-        border-radius: 4px;
-        color: var(--text-primary);
-        font-family: inherit;
-        resize: none;
-        transition: border-color 0.2s ease;
-        height: 360px;
-        overflow-y: auto;
-
-        &.focused {
-          border-color: #3CBCDD;
-          outline: none;
-        }
-
-        &::placeholder {
-          color: var(--text-secondary);
-        }
-
-        // Personalización del scrollbar
-        &::-webkit-scrollbar {
-          width: 6px;
-        }
-
-        &::-webkit-scrollbar-track {
-          background: transparent;
-        }
-
-        &::-webkit-scrollbar-thumb {
-          background-color: #3CBCDD;
-          border-radius: 3px;
-
-          &:hover {
-            background-color: color.adjust(#3CBCDD, $lightness: -10%);
-          }
         }
       }
 
@@ -158,7 +228,42 @@
         }
 
         textarea {
+          width: 100%;
           min-height: 360px;
+          padding: 1rem;
+          background-color: rgba(17, 17, 17, 0.3);
+          border: 1px solid var(--text-tertiary);
+          border-radius: 4px;
+          color: var(--text-primary);
+          font-family: inherit;
+          resize: none;
+          transition: border-color 0.2s ease;
+
+          &.focused {
+            border-color: #3CBCDD;
+            outline: none;
+          }
+
+          &::placeholder {
+            color: var(--text-secondary);
+          }
+
+          &::-webkit-scrollbar {
+            width: 6px;
+          }
+
+          &::-webkit-scrollbar-track {
+            background: transparent;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background-color: #3CBCDD;
+            border-radius: 3px;
+
+            &:hover {
+              background-color: color.adjust(#3CBCDD, $lightness: -10%);
+            }
+          }
         }
       }
 
@@ -187,6 +292,11 @@
           &:hover {
             background-color: rgba(255, 255, 255, 0.05);
           }
+
+          &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
         }
 
         .decrypt-btn {
@@ -210,6 +320,7 @@
 
           &:disabled {
             background-color: var(--text-tertiary);
+            cursor: not-allowed;
           }
         }
       }
@@ -226,6 +337,21 @@
   }
 }
 
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 @media (max-width: 768px) {
   .decrypt-container {
     padding: 1rem;
@@ -235,8 +361,30 @@
       gap: 1.5rem;
 
       .text-area-wrapper {
-        textarea {
-          height: 240px;
+        .input-area {
+          textarea {
+            height: 240px;
+          }
+
+          .processing-overlay {
+            .processing-content {
+              padding: 1rem;
+
+              .processing-icon {
+                font-size: 36px;
+                width: 36px;
+                height: 36px;
+              }
+
+              p {
+                font-size: 1rem;
+              }
+
+              mat-progress-bar {
+                width: 150px;
+              }
+            }
+          }
         }
 
         .textarea-container textarea {
@@ -260,11 +408,10 @@
             order: 1;
           }
 
-          &:not(.right) {
-            .clear-btn,
-            .decrypt-btn {
-              width: 100%;
-            }
+          .clear-btn,
+          .decrypt-btn {
+            width: 100%;
+            min-width: auto;
           }
         }
       }

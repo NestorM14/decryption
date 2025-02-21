@@ -9,19 +9,43 @@
             <div class="line"></div>
           </div>
         </div>
-        <textarea
-          formControlName="encryptedCode"
-          placeholder="Paste your encrypted code here"
-          [ngClass]="{'focused': encryptedFocused}"
-          (focus)="encryptedFocused = true"
-          (blur)="encryptedFocused = false">
-        </textarea>
+        <div class="input-area" [class.processing]="isProcessing">
+          <textarea
+            formControlName="encryptedCode"
+            placeholder="Paste your encrypted code here"
+            [ngClass]="{'focused': encryptedFocused}"
+            (focus)="encryptedFocused = true"
+            (blur)="encryptedFocused = false">
+          </textarea>
+
+          <div class="processing-overlay" *ngIf="isProcessing">
+            <div class="processing-content">
+              <mat-icon class="processing-icon">lock_open</mat-icon>
+              <p>Decrypting...</p>
+              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            </div>
+          </div>
+
+          <div class="error-message" *ngIf="hasError">
+            <mat-icon>error_outline</mat-icon>
+            {{ errorMessage }}
+          </div>
+        </div>
+
         <div class="actions">
-          <button mat-flat-button class="decrypt-btn mobile-first" (click)="decrypt()" [disabled]="!decryptForm.get('encryptedCode')?.value">
-            <mat-icon>lock_open</mat-icon>
-            Decrypt
+          <button
+            mat-flat-button
+            class="decrypt-btn mobile-first"
+            (click)="decrypt()"
+            [disabled]="!decryptForm.get('encryptedCode')?.value || isProcessing">
+            <mat-icon>{{isProcessing ? 'hourglass_empty' : 'lock_open'}}</mat-icon>
+            {{isProcessing ? 'Decrypting...' : 'Decrypt'}}
           </button>
-          <button mat-button class="clear-btn mobile-second" (click)="clearForm()">
+          <button
+            mat-button
+            class="clear-btn mobile-second"
+            (click)="clearForm()"
+            [disabled]="isProcessing">
             <mat-icon>delete_outline</mat-icon>
             Clear
           </button>
@@ -36,7 +60,11 @@
             <div class="line"></div>
           </div>
         </div>
-        <button mat-icon-button class="copy-btn" (click)="copyToClipboard()" [disabled]="!decryptForm.get('decryptedCode')?.value">
+        <button
+          mat-icon-button
+          class="copy-btn"
+          (click)="copyToClipboard()"
+          [disabled]="!decryptForm.get('decryptedCode')?.value">
           <mat-icon>{{copiado ? 'check' : 'content_copy'}}</mat-icon>
         </button>
         <div class="textarea-container">

@@ -21,12 +21,14 @@ export class DecryptAreaComponent implements AfterViewInit {
   dataDesencriptada: any;
   version = packageJson.version;
   copiado: boolean = false;
+  isProcessing: boolean = false;
+  hasError: boolean = false;
+  errorMessage: string = '';
 
   encryptedCode = new FormControl('');
   currentYear = new Date().getFullYear();
 
   private _timeoutId: any;
-
   private _fb = inject(FormBuilder);
   private _encryptionSrv = inject(EncryptionService);
 
@@ -36,14 +38,12 @@ export class DecryptAreaComponent implements AfterViewInit {
       decryptedCode: ['']
     });
 
-    // Suscribirse a los cambios del campo decryptedCode
     this.decryptForm.get('decryptedCode')?.valueChanges.subscribe(() => {
       setTimeout(() => this.adjustTextareaHeight(), 0);
     });
   }
 
   ngAfterViewInit() {
-    // Ajustar altura inicial si hay contenido
     if (this.decryptForm.get('decryptedCode')?.value) {
       this.adjustTextareaHeight();
     }
@@ -53,17 +53,9 @@ export class DecryptAreaComponent implements AfterViewInit {
     if (this.preContent && this.decryptedTextarea) {
       const content = this.preContent.nativeElement;
       const textarea = this.decryptedTextarea.nativeElement;
-
-      // La altura del contenido más el padding
       const contentHeight = content.scrollHeight;
-
-      // Calculamos la altura máxima disponible (viewport - espacio para otros elementos)
-      const maxHeight = window.innerHeight - 300; // Ajusta este valor según necesites
-
-      // Usamos la altura del contenido, pero no menos que 360px ni más que maxHeight
+      const maxHeight = window.innerHeight - 300;
       const finalHeight = Math.min(Math.max(360, contentHeight), maxHeight);
-
-      // Aplicamos la altura calculada
       textarea.style.height = `${finalHeight}px`;
     }
   }
@@ -71,11 +63,17 @@ export class DecryptAreaComponent implements AfterViewInit {
   clearForm() {
     this.decryptForm.reset();
     this.dataDesencriptada = '';
+    this.hasError = false;
+    this.errorMessage = '';
   }
 
   decrypt() {
     const code = this.decryptForm.get('encryptedCode')?.value;
     if (code) {
+      this.isProcessing = true;
+      this.hasError = false;
+      this.errorMessage = '';
+
       const encryptedData = this.extractEncryptedCode(code);
 
       if (encryptedData) {
@@ -83,18 +81,25 @@ export class DecryptAreaComponent implements AfterViewInit {
           next: (data) => {
             const formattedData = JSON.stringify(data, null, 2);
             this.decryptForm.patchValue({ decryptedCode: formattedData });
+            this.isProcessing = false;
           },
           error: (error) => {
             console.error('Error al desencriptar:', error);
+            this.hasError = true;
+            this.errorMessage = 'No se pudo desencriptar el mensaje';
             this.decryptForm.patchValue({
-              decryptedCode: JSON.stringify({ error: 'No se pudo desencriptar el mensaje' }, null, 2)
+              decryptedCode: JSON.stringify({ error: this.errorMessage }, null, 2)
             });
+            this.isProcessing = false;
           }
         });
       } else {
+        this.hasError = true;
+        this.errorMessage = 'No se encontró un código encriptado válido';
         this.decryptForm.patchValue({
-          decryptedCode: JSON.stringify({ error: 'No se encontró un código encriptado válido' }, null, 2)
+          decryptedCode: JSON.stringify({ error: this.errorMessage }, null, 2)
         });
+        this.isProcessing = false;
       }
     }
   }
