@@ -17,7 +17,7 @@ import { MaterialModule } from './shared/material.module';
 export class AppComponent {
   public title = 'Decrypted';
   public dataDesencriptada: any;
-  public showEncryptArea = true;
+  public showEncryptArea = false;
   public copiado: boolean = false;
   public version = packageJson.version;
   public encryptedCode = new FormControl('');
