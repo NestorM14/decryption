@@ -94,3 +94,47 @@
     min-height: unset;
   }
 }
+
+@keyframes gradient-change {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+article {
+  width: 100%;
+  text-align: center;
+}
+
+article h1.title {
+  background: linear-gradient(90deg,
+    rgba(220, 220, 220, 1) 0%,
+    rgba(255, 255, 255, 1) 25%,
+    rgba(170, 170, 170, 1) 50%,
+    rgba(220, 220, 220, 1) 75%,
+    rgba(255, 255, 255, 1) 100%);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-change 4s linear infinite;
+  display: inline-block;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 auto;
+}
+
+/* Fallback para navegadores que no soportan background-clip */
+@supports not (background-clip: text) {
+  article h1.title {
+    color: #e0e0e0;
+    -webkit-text-fill-color: #e0e0e0;
+  }
+}
