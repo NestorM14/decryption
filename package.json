@@ -8,7 +8,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "deploy": "npm run build && gh-pages -d dist/decryption/browser"
+    "deploy": "ng deploy --base-href=/decryption/ --repo=git@github_vass:NestorM14/decryption.git"
   },
   "private": true,
   "dependencies": {
