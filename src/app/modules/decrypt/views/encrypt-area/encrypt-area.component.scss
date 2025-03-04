@@ -3,9 +3,9 @@
 .encrypt-container {
   position: relative;
   z-index: 5;
-  padding: 2rem;
+  padding: 1.5rem 2rem;
   text-align: center;
-  min-height: 100vh;
+  min-height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
 
@@ -36,7 +36,7 @@
     position: relative;
     z-index: 6;
     display: flex;
-    gap: 2rem;
+    gap: 1.5rem;
     height: 100%;
 
     .text-area-wrapper {

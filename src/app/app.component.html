@@ -2,20 +2,19 @@
   <div class="gradient-overlay"></div>
   <app-header/>
 
-  <p class="subtitle">VASS</p>
   <article>
     <h1 class="title">{{title}}</h1>
   </article>
 
   <div class="buttons-container">
     <button (click)="showEncrypt()"
-            class="action-button"
+            class="action-button compact"
             [class.active]="showEncryptArea">
       <mat-icon>lock</mat-icon>
       Encriptar
     </button>
     <button (click)="showDecrypt()"
-            class="action-button"
+            class="action-button compact"
             [class.active]="!showEncryptArea">
       <mat-icon>lock_open</mat-icon>
       Desencriptar
@@ -28,4 +27,8 @@
   @else {
     <app-decrypt-area/>
   }
+
+  <div class="main-footer">
+    V {{version}} | NST | {{currentYear}}
+  </div>
 </div>

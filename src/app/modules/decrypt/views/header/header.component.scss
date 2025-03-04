@@ -25,6 +25,16 @@
     }
   }
 
+  .subtitle {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 1.1rem;
+    font-weight: 400;
+  }
+
   .actions {
     display: flex;
     align-items: center;

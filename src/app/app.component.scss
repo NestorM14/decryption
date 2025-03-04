@@ -21,6 +21,7 @@
   font-size: 2rem;
   margin-bottom: 1rem;
   font-weight: 500;
+  margin-top: 0.5rem;
 }
 
 .subtitle {
@@ -41,38 +42,63 @@
 .buttons-container {
   display: flex;
   justify-content: center;
-  margin: 2rem auto;
+  margin: 1.5rem auto;
   z-index: 1;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(8px);
   border-radius: 8px;
-  padding: 4px;
+  padding: 3px;
   width: fit-content;
+
+  .action-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 24px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 14px;
+    min-width: 120px;
+    transition: all 0.3s ease;
+
+    &.compact {
+      padding: 6px 18px;
+      min-width: 110px;
+      font-size: 13px;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    &.active {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    mat-icon {
+      font-size: 18px;
+      height: 18px;
+      width: 18px;
+    }
+  }
 }
 
-.action-button {
-  padding: 0.75rem 1.5rem;
-  background-color: rgba(34, 34, 34, 0.1);
-  color: var(--text-primary);
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
-  border-radius: 6px;
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-  }
-
-  &.active {
-    background-color: rgba(255, 255, 255, 0.25);
-  }
-
-  i {
-    font-size: 1.1rem;
-  }
+.main-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  background-color: rgba(0, 0, 0, 0.2);
+  z-index: 10;
 }
 
 @media (max-width: 768px) {

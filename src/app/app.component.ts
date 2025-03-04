@@ -21,6 +21,7 @@ export class AppComponent {
   public copiado: boolean = false;
   public version = packageJson.version;
   public encryptedCode = new FormControl('');
+  public currentYear = new Date().getFullYear();
 
   private _timeoutId: any;
   private _encryptionSrv = inject(EncryptionService);
