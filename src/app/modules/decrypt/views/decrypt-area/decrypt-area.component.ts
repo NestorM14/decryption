@@ -166,51 +166,62 @@ export class DecryptAreaComponent implements OnInit, AfterViewInit {
 
   // Ajustar el método para aplicar estilos programáticamente
   applyJsonViewerStyles() {
-    // Primero aplicamos estilos globales
+    // Primero aplicamos estilos globales con mayor especificidad
     const styleElement = document.createElement('style');
     styleElement.textContent = `
-      .ngx-json-viewer .segment-value.string {
+      .ngx-json-viewer .segment .segment-main .segment-value.string {
         color: #4EC9B0 !important;
         background-color: transparent !important;
+        word-break: break-all;
       }
-      .ngx-json-viewer .segment-key {
+      .ngx-json-viewer .segment .segment-main .segment-key {
         color: #61dafe !important;
       }
-      .ngx-json-viewer .segment-value.number {
+      .ngx-json-viewer .segment .segment-main .segment-value.number {
         color: #85cc5e !important;
         background-color: transparent !important;
       }
-      .ngx-json-viewer .segment-value.boolean {
+      .ngx-json-viewer .segment .segment-main .segment-value.boolean {
         color: #569cd6 !important;
         background-color: transparent !important;
       }
-      .ngx-json-viewer .segment-value.date {
+      .ngx-json-viewer .segment .segment-main .segment-value.date {
         color: #c586c0 !important;
         background-color: transparent !important;
       }
-      .ngx-json-viewer .segment-value.null {
+      .ngx-json-viewer .segment .segment-main .segment-value.null {
         color: #808080 !important;
+        background-color: transparent !important;
+      }
+      .ngx-json-viewer .segment .segment-main .segment-value {
+        color: #4ec9a4 !important;
         background-color: transparent !important;
       }
     `;
     document.head.appendChild(styleElement);
 
-    // Luego intentamos aplicar estilos directamente en el elemento
+    // Luego intentamos aplicar estilos directamente en el elemento con un tiempo de espera mayor
     setTimeout(() => {
       const jsonViewer = document.getElementById('json-viewer-element');
       if (jsonViewer) {
-        // Seleccionar todos los elementos .string dentro del visualizador
-        const stringElements = jsonViewer.querySelectorAll('.segment-value.string');
-        stringElements.forEach(element => {
-          (element as HTMLElement).style.color = '#4EC9B0';
-          (element as HTMLElement).style.backgroundColor = 'transparent';
-        });
+        // Aplicar estilos a todos los tipos de valores
+        const applyStyleToElements = (selector: string, color: string) => {
+          const elements = jsonViewer.querySelectorAll(selector);
+          elements.forEach(element => {
+            (element as HTMLElement).style.color = color;
+            (element as HTMLElement).style.backgroundColor = 'transparent';
+          });
+        };
 
-        // Aplicar estilos a otros elementos si es necesario
-        jsonViewer.querySelectorAll('.segment-key').forEach(element => {
-          (element as HTMLElement).style.color = '#61dafe';
-        });
+        // Aplicar estilos a cada tipo de valor
+        applyStyleToElements('.segment-value.string', '#4EC9B0');
+        applyStyleToElements('.segment-value.number', '#85cc5e');
+        applyStyleToElements('.segment-value.boolean', '#569cd6');
+        applyStyleToElements('.segment-value.date', '#c586c0');
+        applyStyleToElements('.segment-value.null', '#808080');
+        applyStyleToElements('.segment-value', '#4ec9a4');
+        applyStyleToElements('.segment-key', '#61dafe');
       }
-    }, 200);
+    }, 300); // Aumentamos el tiempo de espera para asegurar que el DOM esté listo
   }
 }

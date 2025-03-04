@@ -288,7 +288,7 @@
                   }
 
                   .segment-key {
-                    color: #61dafe !important;
+                    color: #61f4fe !important;
                     flex-shrink: 0;
                     margin-right: 4px;
                   }
@@ -304,9 +304,10 @@
                     overflow: hidden;
                     text-overflow: ellipsis;
                     background-color: transparent !important;
+                    color: #4ec97d !important;
 
                     &.string {
-                      color: #4EC9B0 !important;
+                      /* color: #4ec97d !important; */
                       background-color: transparent !important;
                       word-break: break-all;
                     }

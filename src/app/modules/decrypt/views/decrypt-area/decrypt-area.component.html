@@ -11,14 +11,9 @@
         </div>
         <div class="input-area" [class.processing]="isProcessing">
           <div class="animated-border"></div>
-          <textarea
-            formControlName="encryptedCode"
-            placeholder="Paste your encrypted code here"
-            [ngClass]="{'focused': encryptedFocused}"
-            (focus)="encryptedFocused = true"
-            (blur)="encryptedFocused = false">
-          </textarea>
-
+          <textarea formControlName="encryptedCode" placeholder="Paste your encrypted code here"
+            [ngClass]="{'focused': encryptedFocused}" (focus)="encryptedFocused = true"
+            (blur)="encryptedFocused = false"></textarea>
           <div class="processing-overlay" *ngIf="isProcessing">
             <div class="processing-content">
               <mat-icon class="processing-icon">lock_open</mat-icon>
@@ -26,29 +21,19 @@
               <mat-progress-bar mode="indeterminate"></mat-progress-bar>
             </div>
           </div>
-
           <div class="error-message" *ngIf="hasError">
-            <mat-icon>error_outline</mat-icon>
-            {{ errorMessage }}
+            <mat-icon>error_outline</mat-icon>{{ errorMessage }}
           </div>
         </div>
-
         <div class="actions">
-          <button
-            mat-flat-button
-            class="decrypt-btn mobile-first"
-            (click)="decrypt()"
+          <button mat-flat-button class="decrypt-btn mobile-first" (click)="decrypt()"
             [disabled]="!decryptForm.get('encryptedCode')?.value || isProcessing">
             <mat-icon>{{isProcessing ? 'hourglass_empty' : 'lock_open'}}</mat-icon>
             {{isProcessing ? 'Decrypting...' : 'Decrypt'}}
           </button>
-          <button
-            mat-button
-            class="clear-btn mobile-second"
-            (click)="clearForm()"
+          <button mat-button class="clear-btn mobile-second" (click)="clearForm()"
             [disabled]="isProcessing">
-            <mat-icon>delete_outline</mat-icon>
-            Clear
+            <mat-icon>delete_outline</mat-icon>Clear
           </button>
         </div>
       </div>
@@ -61,10 +46,7 @@
             <div class="line"></div>
           </div>
         </div>
-        <button
-          mat-icon-button
-          class="copy-btn"
-          (click)="copyToClipboard()"
+        <button mat-icon-button class="copy-btn" (click)="copyToClipboard()"
           [disabled]="!decryptForm.get('decryptedCode')?.value">
           <mat-icon>{{copiado ? 'check' : 'content_copy'}}</mat-icon>
         </button>
@@ -73,12 +55,8 @@
         <div class="result-container" [class.expanded]="showJsonViewer && parsedJsonData">
           <!-- Visualizador JSON mejorado cuando hay datos -->
           <div class="json-viewer-wrapper" *ngIf="showJsonViewer && parsedJsonData">
-            <ngx-json-viewer
-              id="json-viewer-element"
-              [json]="parsedJsonData"
-              [expanded]="true"
-              [depth]="2">
-            </ngx-json-viewer>
+            <ngx-json-viewer id="json-viewer-element" [json]="parsedJsonData"
+              [expanded]="true" [depth]="2"></ngx-json-viewer>
           </div>
 
           <!-- Mensaje de estado vacío cuando no hay datos -->
@@ -89,15 +67,10 @@
 
           <!-- Mantener el textarea oculto para seguir guardando el valor -->
           <pre #preContent class="pre-content">{{decryptForm.get('decryptedCode')?.value}}</pre>
-          <textarea
-            #decryptedTextarea
-            formControlName="decryptedCode"
-            [ngClass]="{'focused': decryptedFocused}"
-            (focus)="decryptedFocused = true"
-            (blur)="decryptedFocused = false"
-            readonly
-            [style.display]="showJsonViewer ? 'none' : 'block'">
-          </textarea>
+          <textarea #decryptedTextarea formControlName="decryptedCode"
+            [ngClass]="{'focused': decryptedFocused}" (focus)="decryptedFocused = true"
+            (blur)="decryptedFocused = false" readonly
+            [style.display]="showJsonViewer ? 'none' : 'block'"></textarea>
         </div>
       </div>
     </div>
