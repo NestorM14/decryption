@@ -1,0 +1,30 @@
+name: Build and Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
+          cache: 'npm'  # Añadir caché para acelerar la instalación de dependencias
+
+      - name: Install dependencies
+        run: npm ci  # Usar npm ci en lugar de npm install para instalaciones más consistentes
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: npm run ng -- deploy --no-silent --repo=https://github.com/NestorM14/decryption.git --name="NestorM14" --email="nestor.martinezc@vasscompany.com" --base-href=/decryption/

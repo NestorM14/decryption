@@ -15,7 +15,7 @@ import { MaterialModule } from './shared/material.module';
     styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  public title = 'Decrypted';
+  public title = 'Security';
   public dataDesencriptada: any;
   public showEncryptArea = false;
   public copiado: boolean = false;
@@ -27,12 +27,12 @@ export class AppComponent {
   private _encryptionSrv = inject(EncryptionService);
 
   showEncrypt() {
-    this.title = 'Encrypted';
+    this.title = 'Security';
     this.showEncryptArea = true;
   }
 
   showDecrypt() {
-    this.title = 'Decrypted';
+    this.title = 'Security';
     this.showEncryptArea = false;
   }
 
