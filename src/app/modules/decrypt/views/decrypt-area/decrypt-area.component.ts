@@ -1,24 +1,27 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, inject, ViewChild, ElementRef, AfterViewInit, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MaterialModule } from '../../../../shared/material.module';
 import * as packageJson from './../../../../../../package.json';
 import { EncryptionService } from '../../../../shared/services/encryption.service';
+import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
 @Component({
   selector: 'app-decrypt-area',
-  imports: [CommonModule, MaterialModule, ReactiveFormsModule, FormsModule],
+  standalone: true,
+  imports: [CommonModule, MaterialModule, ReactiveFormsModule, FormsModule, NgxJsonViewerModule],
   templateUrl: './decrypt-area.component.html',
   styleUrl: './decrypt-area.component.scss'
 })
-export class DecryptAreaComponent implements AfterViewInit {
+export class DecryptAreaComponent implements OnInit, AfterViewInit {
   @ViewChild('preContent') preContent!: ElementRef;
   @ViewChild('decryptedTextarea') decryptedTextarea!: ElementRef;
 
   decryptForm!: FormGroup;
   encryptedFocused = false;
   decryptedFocused = false;
-  dataDesencriptada: any;
+  parsedJsonData: any = null;
+  showJsonViewer = false;
   version = packageJson.version;
   copiado: boolean = false;
   isProcessing: boolean = false;
@@ -47,22 +50,35 @@ export class DecryptAreaComponent implements AfterViewInit {
     if (this.decryptForm.get('decryptedCode')?.value) {
       this.adjustTextareaHeight();
     }
+
+    // Aplicar estilos programáticamente para asegurarnos que se aplican correctamente
+    setTimeout(() => {
+      this.applyJsonViewerStyles();
+    }, 0);
   }
 
-  private adjustTextareaHeight() {
-    if (this.preContent && this.decryptedTextarea) {
-      const content = this.preContent.nativeElement;
-      const textarea = this.decryptedTextarea.nativeElement;
-      const contentHeight = content.scrollHeight;
-      const maxHeight = window.innerHeight - 300;
-      const finalHeight = Math.min(Math.max(360, contentHeight), maxHeight);
-      textarea.style.height = `${finalHeight}px`;
+  adjustTextareaHeight(): void {
+    if (!this.showJsonViewer) {
+      if (this.decryptedTextarea && this.decryptedTextarea.nativeElement) {
+        const textarea = this.decryptedTextarea.nativeElement;
+
+        // Calculamos la altura basada en el contenido
+        textarea.style.height = '360px'; // Altura inicial fija
+
+        // Solo ajustamos si el contenido es mayor que la altura inicial
+        if (textarea.scrollHeight > 360) {
+          const maxHeight = window.innerHeight - 350;
+          const finalHeight = Math.min(textarea.scrollHeight, maxHeight);
+          textarea.style.height = `${finalHeight}px`;
+        }
+      }
     }
   }
 
   clearForm() {
     this.decryptForm.reset();
-    this.dataDesencriptada = '';
+    this.parsedJsonData = null;
+    this.showJsonViewer = false;
     this.hasError = false;
     this.errorMessage = '';
   }
@@ -73,20 +89,34 @@ export class DecryptAreaComponent implements AfterViewInit {
       this.isProcessing = true;
       this.hasError = false;
       this.errorMessage = '';
+      this.showJsonViewer = false;
+      this.parsedJsonData = null;
 
       const encryptedData = this.extractEncryptedCode(code);
 
       if (encryptedData) {
         this._encryptionSrv.decryptMessage(encryptedData).subscribe({
           next: (data) => {
+            this.parsedJsonData = data;
+            this.showJsonViewer = true;
+
             const formattedData = JSON.stringify(data, null, 2);
             this.decryptForm.patchValue({ decryptedCode: formattedData });
+
             this.isProcessing = false;
+
+            // Asegurar que los estilos se apliquen después de que el JSON viewer se renderice
+            setTimeout(() => {
+              this.applyJsonViewerStyles();
+            }, 100);
           },
           error: (error) => {
             console.error('Error al desencriptar:', error);
             this.hasError = true;
             this.errorMessage = 'No se pudo desencriptar el mensaje';
+            this.parsedJsonData = { error: this.errorMessage };
+            this.showJsonViewer = true;
+
             this.decryptForm.patchValue({
               decryptedCode: JSON.stringify({ error: this.errorMessage }, null, 2)
             });
@@ -96,6 +126,9 @@ export class DecryptAreaComponent implements AfterViewInit {
       } else {
         this.hasError = true;
         this.errorMessage = 'No se encontró un código encriptado válido';
+        this.parsedJsonData = { error: this.errorMessage };
+        this.showJsonViewer = true;
+
         this.decryptForm.patchValue({
           decryptedCode: JSON.stringify({ error: this.errorMessage }, null, 2)
         });
@@ -129,5 +162,55 @@ export class DecryptAreaComponent implements AfterViewInit {
       }
     }
     return null;
+  }
+
+  // Ajustar el método para aplicar estilos programáticamente
+  applyJsonViewerStyles() {
+    // Primero aplicamos estilos globales
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+      .ngx-json-viewer .segment-value.string {
+        color: #4EC9B0 !important;
+        background-color: transparent !important;
+      }
+      .ngx-json-viewer .segment-key {
+        color: #61dafe !important;
+      }
+      .ngx-json-viewer .segment-value.number {
+        color: #85cc5e !important;
+        background-color: transparent !important;
+      }
+      .ngx-json-viewer .segment-value.boolean {
+        color: #569cd6 !important;
+        background-color: transparent !important;
+      }
+      .ngx-json-viewer .segment-value.date {
+        color: #c586c0 !important;
+        background-color: transparent !important;
+      }
+      .ngx-json-viewer .segment-value.null {
+        color: #808080 !important;
+        background-color: transparent !important;
+      }
+    `;
+    document.head.appendChild(styleElement);
+
+    // Luego intentamos aplicar estilos directamente en el elemento
+    setTimeout(() => {
+      const jsonViewer = document.getElementById('json-viewer-element');
+      if (jsonViewer) {
+        // Seleccionar todos los elementos .string dentro del visualizador
+        const stringElements = jsonViewer.querySelectorAll('.segment-value.string');
+        stringElements.forEach(element => {
+          (element as HTMLElement).style.color = '#4EC9B0';
+          (element as HTMLElement).style.backgroundColor = 'transparent';
+        });
+
+        // Aplicar estilos a otros elementos si es necesario
+        jsonViewer.querySelectorAll('.segment-key').forEach(element => {
+          (element as HTMLElement).style.color = '#61dafe';
+        });
+      }
+    }, 200);
   }
 }

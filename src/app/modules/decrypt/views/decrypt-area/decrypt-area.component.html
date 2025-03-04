@@ -68,17 +68,35 @@
           [disabled]="!decryptForm.get('decryptedCode')?.value">
           <mat-icon>{{copiado ? 'check' : 'content_copy'}}</mat-icon>
         </button>
-        <div class="textarea-container">
-          <div class="animated-border"></div>
+
+        <!-- Único contenedor para visualización de resultados -->
+        <div class="result-container" [class.expanded]="showJsonViewer && parsedJsonData">
+          <!-- Visualizador JSON mejorado cuando hay datos -->
+          <div class="json-viewer-wrapper" *ngIf="showJsonViewer && parsedJsonData">
+            <ngx-json-viewer
+              id="json-viewer-element"
+              [json]="parsedJsonData"
+              [expanded]="true"
+              [depth]="2">
+            </ngx-json-viewer>
+          </div>
+
+          <!-- Mensaje de estado vacío cuando no hay datos -->
+          <div class="placeholder-message" *ngIf="!decryptForm.get('decryptedCode')?.value">
+            <mat-icon>code</mat-icon>
+            <p>Your decrypted JSON will appear here</p>
+          </div>
+
+          <!-- Mantener el textarea oculto para seguir guardando el valor -->
           <pre #preContent class="pre-content">{{decryptForm.get('decryptedCode')?.value}}</pre>
           <textarea
             #decryptedTextarea
             formControlName="decryptedCode"
-            placeholder="Your decrypted code will appear here"
             [ngClass]="{'focused': decryptedFocused}"
             (focus)="decryptedFocused = true"
             (blur)="decryptedFocused = false"
-            readonly>
+            readonly
+            [style.display]="showJsonViewer ? 'none' : 'block'">
           </textarea>
         </div>
       </div>
