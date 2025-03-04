@@ -27,6 +27,7 @@
           [class.has-file]="encryptForm.get('rawText')?.value"
           (click)="onDropZoneClick()"
         >
+          <div class="animated-border"></div>
           <div class="drop-zone-content">
             <div class="drop-zone-icon">
               <mat-icon>{{isProcessing ? 'hourglass_empty' : (encryptForm.get('rawText')?.value ? 'check_circle' : 'upload_file')}}</mat-icon>
@@ -97,6 +98,7 @@
           <mat-icon>{{copiado ? 'check' : 'content_copy'}}</mat-icon>
         </button>
         <div class="textarea-container">
+          <div class="animated-border"></div>
           <pre #preContent class="pre-content">{{encryptForm.get('encryptedText')?.value}}</pre>
           <textarea
             #encryptedTextarea

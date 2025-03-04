@@ -10,6 +10,7 @@
           </div>
         </div>
         <div class="input-area" [class.processing]="isProcessing">
+          <div class="animated-border"></div>
           <textarea
             formControlName="encryptedCode"
             placeholder="Paste your encrypted code here"
@@ -68,6 +69,7 @@
           <mat-icon>{{copiado ? 'check' : 'content_copy'}}</mat-icon>
         </button>
         <div class="textarea-container">
+          <div class="animated-border"></div>
           <pre #preContent class="pre-content">{{decryptForm.get('decryptedCode')?.value}}</pre>
           <textarea
             #decryptedTextarea

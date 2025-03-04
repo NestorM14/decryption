@@ -72,12 +72,12 @@
     }
 
     &:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.15);
     }
 
     &.active {
-      background: var(--accent-primary);
-      color: white;
+      background-color: rgba(255, 255, 255, 0.25);
+      color: var(--text-primary);
     }
 
     mat-icon {
