@@ -51,10 +51,44 @@
 
         label {
           display: block;
-          color: var(--text-primary);
           font-size: 1.3rem;
           font-weight: 500;
           margin-bottom: 0.75rem;
+
+          // Aplicar efecto de gradiente
+          background: linear-gradient(90deg,
+            rgba(220, 220, 220, 1) 0%,
+            rgba(255, 255, 255, 1) 25%,
+            rgba(170, 170, 170, 1) 50%,
+            rgba(220, 220, 220, 1) 75%,
+            rgba(255, 255, 255, 1) 100%);
+          background-size: 200% auto;
+          color: transparent;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: gradient-change 4s linear infinite;
+          display: inline-block;
+        }
+
+        @keyframes gradient-change {
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+
+        /* Fallback para navegadores que no soportan background-clip */
+        @supports not (background-clip: text) {
+          label {
+            color: #e0e0e0;
+            -webkit-text-fill-color: #e0e0e0;
+          }
         }
 
         .line-container {
@@ -78,15 +112,27 @@
       }
 
       .drop-zone {
-        position: relative;
         width: 100%;
-        min-height: 360px;
-        border: 2px dashed var(--text-tertiary);
-        border-radius: 8px;
-        transition: all 0.3s ease;
+        position: relative;
         background-color: rgba(17, 17, 17, 0.3);
+        border: 1px solid var(--text-tertiary);
+        border-radius: 4px;
+        min-height: 360px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
         cursor: pointer;
-        overflow: hidden;
+
+        &:hover {
+          border-color: #3CBCDD;
+          box-shadow: 0 0 8px rgba(60, 188, 221, 0.3);
+        }
+
+        &.focused {
+          border-color: #3CBCDD;
+          box-shadow: 0 0 12px rgba(60, 188, 221, 0.4);
+        }
 
         .animated-border {
           display: none;
@@ -112,10 +158,6 @@
               color: #4CAF50;
             }
           }
-        }
-
-        &.focused {
-          border-color: #3CBCDD;
         }
 
         &.processing {
@@ -220,43 +262,30 @@
       }
 
       .textarea-container {
-        position: relative;
         width: 100%;
-        display: flex;
-        flex-direction: column;
+        position: relative;
+        background-color: rgba(17, 17, 17, 0.3);
+        border: 1px solid var(--text-tertiary);
+        border-radius: 4px;
+        overflow: hidden;
+        transition: all 0.3s ease;
 
-        .animated-border {
-          display: none;
-        }
-
-        .pre-content {
-          position: absolute;
-          visibility: hidden;
-          padding: 1rem;
-          width: 100%;
-          font-family: inherit;
-          font-size: inherit;
-          white-space: pre-wrap;
-          word-wrap: break-word;
-          box-sizing: border-box;
-          margin: 0;
-          text-align: left;
+        &:hover {
+          border-color: #3CBCDD;
+          box-shadow: 0 0 8px rgba(60, 188, 221, 0.3);
         }
 
         textarea {
           width: 100%;
-          min-height: 360px;
+          height: 360px;
           padding: 1rem;
-          background-color: rgba(17, 17, 17, 0.3);
-          border: 1px solid var(--text-tertiary);
-          border-radius: 4px;
+          background-color: transparent;
+          border: none;
           color: var(--text-primary);
           font-family: inherit;
           resize: none;
-          transition: border-color 0.2s ease;
 
           &.focused {
-            border-color: #3CBCDD;
             outline: none;
           }
 

@@ -51,10 +51,44 @@
 
         label {
           display: block;
-          color: var(--text-primary);
           font-size: 1.3rem;
           font-weight: 500;
           margin-bottom: 0.75rem;
+
+          // Aplicar efecto de gradiente
+          background: linear-gradient(90deg,
+            rgba(220, 220, 220, 1) 0%,
+            rgba(255, 255, 255, 1) 25%,
+            rgba(170, 170, 170, 1) 50%,
+            rgba(220, 220, 220, 1) 75%,
+            rgba(255, 255, 255, 1) 100%);
+          background-size: 200% auto;
+          color: transparent;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: gradient-change 4s linear infinite;
+          display: inline-block;
+        }
+
+        @keyframes gradient-change {
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+
+        /* Fallback para navegadores que no soportan background-clip */
+        @supports not (background-clip: text) {
+          label {
+            color: #e0e0e0;
+            -webkit-text-fill-color: #e0e0e0;
+          }
         }
 
         .line-container {
@@ -165,8 +199,14 @@
           height: 360px;
           overflow-y: auto;
 
+          &:hover {
+            border-color: #3CBCDD;
+            box-shadow: 0 0 8px rgba(60, 188, 221, 0.3);
+          }
+
           &.focused {
             border-color: #3CBCDD;
+            box-shadow: 0 0 12px rgba(60, 188, 221, 0.4);
             outline: none;
           }
 
@@ -219,10 +259,16 @@
         border: 1px solid var(--text-tertiary);
         border-radius: 4px;
         overflow: hidden;
-        transition: border-color 0.2s ease;
+        transition: all 0.3s ease;
+
+        &:hover {
+          border-color: #3CBCDD;
+          box-shadow: 0 0 8px rgba(60, 188, 221, 0.3);
+        }
 
         &:hover, &:focus-within {
           border-color: #3CBCDD;
+          box-shadow: 0 0 12px rgba(60, 188, 221, 0.4);
         }
 
         &.expanded {
@@ -304,7 +350,7 @@
                     overflow: hidden;
                     text-overflow: ellipsis;
                     background-color: transparent !important;
-                    color: #4ec97d !important;
+                    color: #f6f6f6 !important;
 
                     &.string {
                       /* color: #4ec97d !important; */
